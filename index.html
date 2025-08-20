@@ -1,427 +1,198 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Clive & Eden — Anniversary Journey</title>
-  <style>
-    :root{
-      --bg1:#fde1e3; --bg2:#e7f0ff; --ink:#222; --muted:#6b7280; --accent:#ff4d6d; --accent2:#7c3aed; --card:#ffffffcc; --ok:#16a34a; --bad:#dc2626;
-    }
-    html,body{height:100%;}
-    body{
-      margin:0;font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
-      color:var(--ink);
-      background: radial-gradient(1200px 800px at 15% 10%, #ffe4f0, transparent),
-                  radial-gradient(1200px 800px at 85% 10%, #eaf5ff, transparent),
-                  radial-gradient(1200px 800px at 50% 100%, #fff5e4, transparent),
-                  linear-gradient(135deg, var(--bg1), var(--bg2));
-      overflow-x:hidden;
-    }
-    .wrapper{max-width:980px;margin:48px auto;padding:0 16px;}
-    .card{background:var(--card);backdrop-filter:blur(8px);border-radius:24px;box-shadow:0 10px 30px rgba(0,0,0,.08);padding:28px;position:relative;overflow:hidden}
-    h1{margin:0 0 8px;font-size:clamp(24px,4vw,42px);line-height:1.1;letter-spacing:.5px}
-    .sub{color:var(--muted);margin-bottom:18px}
-    .progress{height:10px;background:#f1f5f9;border-radius:999px;overflow:hidden}
-    .bar{height:100%;width:0;background:linear-gradient(90deg,var(--accent),#ff9aa2,#ffc2d1,var(--accent2));transition:width .4s ease}
-    .note{font-size:14px;color:#64748b}
-
-    .pill{display:inline-block;background:#f8fafc;border:1px solid #e5e7eb;color:#1f2937;padding:6px 12px;border-radius:999px;font-size:14px}
-    .puzzle{display:none;margin-top:18px}
-    .puzzle.active{display:block}
-    .puzzle h2{font-size:clamp(18px,2.5vw,24px);margin:0 0 8px}
-    .puzzle .desc{color:var(--muted);margin-bottom:12px}
-    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-    input[type=text],input[type=number]{padding:10px 12px;border-radius:10px;border:1px solid #e5e7eb;font-size:16px}
-    button.btn{cursor:pointer;border:0;padding:10px 16px;border-radius:12px;font-weight:600;box-shadow:0 5px 14px rgba(0,0,0,.08)}
-    .btn.primary{background:linear-gradient(90deg,var(--accent),#ff758f);color:#fff}
-    .btn.ghost{background:#fff;border:1px solid #e5e7eb}
-    .ok{color:var(--ok);font-weight:700}
-    .bad{color:var(--bad);font-weight:700}
-
-    /* Floating hearts */
-    .hearts{position:fixed;inset:0;pointer-events:none}
-    .heart{position:absolute;font-size:18px;opacity:.4;animation:floatUp 12s linear infinite}
-    .heart.big{font-size:28px;opacity:.25}
-    .heart.small{font-size:14px;opacity:.5}
-    @keyframes floatUp{0%{transform:translateY(0) scale(1)}100%{transform:translateY(-120vh) scale(1.4)}}
-
-    /* Memory */
-    .grid4{display:grid;grid-template-columns:repeat(4,64px);gap:10px}
-    .cardx{width:64px;height:82px;border-radius:12px;border:1px solid #e5e7eb;background:#fff;display:flex;align-items:center;justify-content:center;font-size:26px;cursor:pointer;box-shadow:0 6px 12px rgba(0,0,0,.06)}
-    .cardx.revealed{background:#fff8fb;border-color:#ffc2d1}
-    .cardx.matched{background:#dcfce7;border-color:#86efac}
-
-    /* Path */
-    .grid16{display:grid;grid-template-columns:repeat(4,48px);gap:6px}
-    .cell{width:48px;height:48px;border-radius:8px;border:1px solid #e5e7eb;background:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;user-select:none}
-    .cell.block{background:#f1f5f9;color:#9ca3af;cursor:not-allowed}
-    .cell.path{background:#fff7ed;border-color:#fdba74}
-    .cell.start{background:#e0f2fe;border-color:#93c5fd}
-    .cell.end{background:#dcfce7;border-color:#86efac}
-
-    /* Sliding */
-    .slide{display:grid;grid-template-columns:repeat(3,84px);gap:8px}
-    .tile{width:84px;height:84px;border-radius:12px;border:1px solid #e5e7eb;background:#fff;font-weight:700;font-size:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 8px 16px rgba(0,0,0,.06)}
-    .tile.blank{background:transparent;border:1px dashed #e5e7eb;cursor:default;box-shadow:none}
-
-    /* Overlay (success + verse, or intermission) */
-    .overlay{position:fixed;inset:0;background:rgba(255,255,255,.7);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;z-index:60}
-    .overlay.show{display:flex}
-    .modal{background:#fff;border-radius:20px;box-shadow:0 20px 50px rgba(0,0,0,.15);padding:22px;max-width:640px;width:90%}
-    .modal h3{margin:0 0 6px}
-    .modal p{margin:6px 0;color:#475569}
-    .modal .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:12px}
-
-    /* Final banner */
-    .banner{position:fixed;left:0;right:0;bottom:-80px;background:linear-gradient(90deg,#16a34a,#34d399);color:white;padding:16px 20px;font-weight:700;display:flex;gap:12px;justify-content:center;align-items:center;transition:bottom .5s ease; z-index:50}
-    .banner.show{bottom:0}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Happy Anniversary — Game Card</title>
+<style>
+body { font-family: 'Segoe UI', sans-serif; background: #fdf6f0; margin:0; padding:0; text-align:center; }
+h1 { margin-top: 20px; }
+.sub { font-size: 1.2rem; margin-bottom: 30px; }
+button { padding: 10px 20px; margin: 10px; cursor:pointer; }
+#game-container { margin: 20px auto; max-width: 800px; }
+.memory-card { border-radius: 8px; }
+.maze-cell { width:30px; height:30px; display:inline-block; border:1px solid #ccc; }
+.correct { background: #4caf50; }
+.wrong { background: #f44336; }
+#lyrics { margin-top: 20px; font-size:1rem; color:#444; min-height:60px; }
+.confetti { position: fixed; width: 100%; height: 100%; top:0; left:0; pointer-events:none; }
+</style>
 </head>
 <body>
-  <div class="hearts" aria-hidden="true" id="hearts"></div>
+<h1>Happy Anniversary 💖</h1>
+<div class="sub">John & Eden</div>
+<div id="game-container"></div>
+<div id="lyrics"></div>
+<audio id="song1" src="call123.mp3" controls></audio>
+<audio id="song2" src="345.mp3" controls></audio>
+<canvas id="confetti-canvas" class="confetti"></canvas>
+<script>
+const gameContainer = document.getElementById('game-container');
+const lyricsDiv = document.getElementById('lyrics');
+let currentGame = 1;
+let scores = [];
 
-  <div class="wrapper">
-    <div class="card">
-      <h1>Happy Anniversary Clive & Eden 💖</h1>
-      <div class="sub">A beautiful journey together, full of love and blessings. Ready to play?</div>
-      <div class="progress" aria-label="progress"><div class="bar" id="bar"></div></div>
-      <div class="note" id="progressNote" style="margin-top:8px">0 / 12 solved</div>
-      <div style="margin-top:12px"><button class="btn primary" id="startBtn">Start the Journey</button></div>
+function clearGameContainer() { gameContainer.innerHTML = ''; lyricsDiv.innerHTML=''; }
+function nextGame() { currentGame++; runGame(); }
 
-      <!-- Puzzles (12) -->
-      <section class="puzzle" id="p1">
-        <h2>1) Logic Math</h2>
-        <div class="desc">If 💍 = 7 and ❤️ = 5, evaluate: <strong>💍 + ❤️ × 2</strong></div>
-        <div class="row"><input id="p1in" type="number" placeholder="Your answer"/><button class="btn primary" onclick="check1()">Check</button><span id="p1msg"></span></div>
-      </section>
+// Utility shuffle
+function shuffleArray(array){for(let i=array.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[array[i],array[j]]=[array[j],array[i]];}}
 
-      <section class="puzzle" id="p2">
-        <h2>2) Word Scramble</h2>
-        <div class="desc">Unscramble into a love‑day word: <strong>E O L V</strong></div>
-        <div class="row"><input id="p2in" type="text" placeholder="Type the word"/><button class="btn primary" onclick="check2()">Check</button><span id="p2msg"></span></div>
-      </section>
+// Start timer for scoring
+let startTime;
+function startTimer(){startTime=Date.now();}
+function endTimer(){return (Date.now()-startTime)/1000;}
 
-      <section class="puzzle" id="p3">
-        <h2>3) XOR Switches</h2>
-        <div class="desc">Set the switches so that <strong>A XOR B = 1</strong>.</div>
-        <div class="row" style="gap:20px"><label><input type="checkbox" id="a"> A</label><label><input type="checkbox" id="b"> B</label><button class="btn primary" onclick="check3()">Check</button><span id="p3msg"></span></div>
-      </section>
+function runGame(){
+switch(currentGame){
+  case 1: startTimer(); game1(); break;
+  case 2: startTimer(); game2(); break;
+  case 3: startTimer(); game3(); break;
+  case 4: startTimer(); startMemoryGame(); break;
+  case 5: startTimer(); game5(); break;
+  case 6: startTimer(); game6(); break;
+  case 7: startTimer(); game7(); break;
+  case 8: startTimer(); game8(); break;
+  case 9: startTimer(); game9(); break;
+  case 10: startTimer(); game10(); break;
+  case 11: startTimer(); game11(); break;
+  case 12: startTimer(); game12(); break;
+  default: gameComplete();
+}}
 
-      <section class="puzzle" id="p4">
-        <h2>4) Memory Match (2 pairs)</h2>
-        <div class="desc">Flip and match the hearts and rings.</div>
-        <div class="grid4" id="memGrid"></div>
-        <div id="p4msg" style="margin-top:10px"></div>
-      </section>
+// GAME 1
+function game1(){
+  clearGameContainer();
+  const title = document.createElement('h2'); title.innerText='Game 1: Solve the number'; gameContainer.appendChild(title);
+  const question = document.createElement('p'); question.innerText='12 × 3 – 6 = ?'; gameContainer.appendChild(question);
+  const input=document.createElement('input'); input.type='number'; gameContainer.appendChild(input);
+  const btn=document.createElement('button'); btn.innerText='Submit'; gameContainer.appendChild(btn);
+  btn.onclick=()=>{
+    if(parseInt(input.value)===30){
+      scores.push({game:1,score:Math.max(10,20-endTimer())});
+      alert('Correct! Love wins.'); nextGame();
+    }else{alert('Try again.');}
+  };
+}
 
-      <section class="puzzle" id="p5">
-        <h2>5) Path Logic</h2>
-        <div class="desc">Click a valid path from <strong>Start</strong> to <strong>End</strong> without blocked cells.</div>
-        <div class="grid16" id="pathGrid" style="margin:10px 0"></div>
-        <div id="p5msg"></div>
-      </section>
+// GAME 2 Sliding puzzle placeholder
+function game2(){
+ clearGameContainer();
+ const title = document.createElement('h2'); title.innerText='Game 2: Arrange the photo'; gameContainer.appendChild(title);
+ const img = document.createElement('img'); img.src='wedding1.jpg'; img.width=300; gameContainer.appendChild(img);
+ const btn = document.createElement('button'); btn.innerText='Next'; btn.onclick=()=>{scores.push({game:2,score:15}); nextGame();}; gameContainer.appendChild(btn);
+}
 
-      <section class="puzzle" id="p6">
-        <h2>6) Sequence</h2>
-        <div class="desc">3, 9, 27, <strong>?</strong>, 243 — choose the missing term.</div>
-        <div class="row"><label><input type="radio" name="s6" value="54"> 54</label><label><input type="radio" name="s6" value="72"> 72</label><label><input type="radio" name="s6" value="81"> 81</label><button class="btn primary" onclick="check6()">Check</button><span id="p6msg"></span></div>
-      </section>
+// GAME 3 Word Scramble
+function game3(){
+ clearGameContainer();
+ const title = document.createElement('h2'); title.innerText='Game 3: Unscramble'; gameContainer.appendChild(title);
+ const phrases=["love is patient","love is kind and love delights in the truth"];
+ let index=0;
+ function nextPhrase(){
+   if(index>=phrases.length){ scores.push({game:3,score:20}); nextGame(); return;}
+   const p=phrases[index];
+   const words=p.split(' ');
+   let scrambled = words.slice().sort(()=>Math.random()-0.5).join(' ');
+   gameContainer.innerHTML='<p>'+scrambled+'</p>';
+   const input = document.createElement('input'); input.type='text'; gameContainer.appendChild(input);
+   const btn = document.createElement('button'); btn.innerText='Submit'; gameContainer.appendChild(btn);
+   btn.onclick=()=>{if(input.value.toLowerCase()===p.toLowerCase()){index++; nextPhrase();}else{alert('Try again.');}};
+ }
+ nextPhrase();
+}
 
-      <section class="puzzle" id="p7">
-        <h2>7) Riddle</h2>
-        <div class="desc">“I speak without a mouth, and hear without ears. I have no body, but I come alive with wind.”</div>
-        <div class="row"><input id="p7in" type="text" placeholder="Your answer"/><button class="btn primary" onclick="check7()">Check</button><span id="p7msg"></span></div>
-      </section>
-
-      <section class="puzzle" id="p8">
-        <h2>8) Sliding Puzzle (3×3)</h2>
-        <div class="desc">Click tiles next to the blank to arrange 1→8.</div>
-        <div class="slide" id="slide"></div>
-        <div class="note" style="margin-top:8px">Tip: solvable layout is pre‑shuffled.</div>
-        <div id="p8msg" style="margin-top:10px"></div>
-      </section>
-
-      <section class="puzzle" id="p9">
-        <h2>9) What comes next?</h2>
-        <div class="desc">ONE, TWO, THREE, <strong>_____</strong></div>
-        <div class="row"><input id="p9in" type="text" placeholder="Type the word"/><button class="btn primary" onclick="check9()">Check</button><span id="p9msg"></span></div>
-      </section>
-
-      <section class="puzzle" id="p10">
-        <h2>10) True or False</h2>
-        <div class="desc">The sum of angles in a triangle is 180 degrees.</div>
-        <div class="row"><label><input type="radio" name="t10" value="true"> True</label><label><input type="radio" name="t10" value="false"> False</label><button class="btn primary" onclick="check10()">Check</button><span id="p10msg"></span></div>
-      </section>
-
-      <section class="puzzle" id="p11">
-        <h2>11) Emoji Decode</h2>
-        <div class="desc">💒  +  ❤️  =  ?  (one word)</div>
-        <div class="row"><input id="p11in" type="text" placeholder="Your answer"/><button class="btn primary" onclick="check11()">Check</button><span id="p11msg"></span></div>
-      </section>
-
-      <section class="puzzle" id="p12">
-        <h2>12) Final Code</h2>
-        <div class="desc">Enter the promise word hidden across the journey.</div>
-        <div class="row"><input id="p12in" type="text" placeholder="7 letters" maxlength="12"/><button class="btn primary" onclick="check12()">Unlock</button><span id="p12msg"></span></div>
-        <div class="note">Hint: It lasts through every season.</div>
-      </section>
-
-      <div style="margin-top:18px" class="note">Games unlock one‑by‑one. Progress and timing reset on reload.</div>
-    </div>
-  </div>
-
-  <div class="overlay" id="overlay">
-    <div class="modal" id="modal">
-      <h3 id="modalTitle">Well done!</h3>
-      <p id="modalBody">Verse will appear here.</p>
-      <p class="note" id="modalTime"></p>
-      <div class="actions">
-        <button class="btn ghost" id="modalClose">OK, Next</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Intermission (after game 6, with song) -->
-  <div class="overlay" id="break">
-    <div class="modal">
-      <h3>Intermission 🎵</h3>
-      <p>Take a moment, breathe, and enjoy this song.</p>
-      <audio id="audio6" src="call123.mp3" preload="auto" controls></audio>
-      <p class="note">The next game unlocks when the song finishes.</p>
-      <div class="actions">
-        <button class="btn primary" id="continue7" disabled>Continue to Game 7</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Finale banner (after game 12) -->
-  <div class="banner" id="finalBanner">🎉 You’ve completed all the problems on this page — now enjoy the song!</div>
-
-  <!-- Final song -->
-  <audio id="audio12" src="345.mp3" preload="auto"></audio>
-
-  <script>
-    // -------- CONFIG --------
-    const TOTAL = 12; let solved = 0; let current = 0;
-    const bar = document.getElementById('bar');
-    const progressNote = document.getElementById('progressNote');
-    const startBtn = document.getElementById('startBtn');
-    const overlay = document.getElementById('overlay');
-    const modalTitle = document.getElementById('modalTitle');
-    const modalBody = document.getElementById('modalBody');
-    const modalTime = document.getElementById('modalTime');
-    const modalClose = document.getElementById('modalClose');
-    const breakOv = document.getElementById('break');
-    const song6 = document.getElementById('audio6');
-    const cont7 = document.getElementById('continue7');
-    const finalBanner = document.getElementById('finalBanner');
-    const song12 = document.getElementById('audio12');
-
-    // Encouragement verses for wife (rotating)
-    const VERSES = [
-      '“A wife of noble character who can find? She is worth far more than rubies.” — Proverbs 31:10',
-      '“She is clothed with strength and dignity; she can laugh at the days to come.” — Proverbs 31:25',
-      '“She speaks with wisdom, and faithful instruction is on her tongue.” — Proverbs 31:26',
-      '“He who finds a wife finds what is good and receives favor from the Lord.” — Proverbs 18:22',
-      '“Love is patient, love is kind. It always protects, always trusts, always hopes, always perseveres.” — 1 Corinthians 13:4,7',
-      '“Two are better than one… A cord of three strands is not quickly broken.” — Ecclesiastes 4:9,12',
-      '“The Lord make his face shine on you and be gracious to you.” — Numbers 6:25',
-      '“May the God of hope fill you with all joy and peace as you trust in him.” — Romans 15:13',
-      '“Her children arise and call her blessed; her husband also, and he praises her.” — Proverbs 31:28'
-    ];
-
-    // Category mapping (5 categories)
-    const CATS = {1:'Speed',2:'Creativity',3:'Accuracy',4:'Memory',5:'Dedication',6:'Speed',7:'Dedication',8:'Dedication',9:'Accuracy',10:'Accuracy',11:'Creativity',12:'Dedication'};
-    const catScores = {Speed:0, Accuracy:0, Memory:0, Creativity:0, Dedication:0};
-
-    // Timing & scoring
-    const tStart = {}; const tDur = {}; const gScore = {};
-    // Default thresholds (seconds) → points
-    const THRESH = {
-      default:[5,10,20,40], // <=5:5pts, <=10:4, <=20:3, <=40:2, else 1
-      long:[20,40,70,120]   // for longer puzzles (path, sliding)
+// GAME 4 Memory 8 cards
+function startMemoryGame(){
+  clearGameContainer();
+  const title = document.createElement('h2'); title.innerText='Game 4: Memory Match (8 cards)'; gameContainer.appendChild(title);
+  const cardValues = ["🍎","🍎","🍌","🍌","🍇","🍇","🍒","🍒"];
+  shuffleArray(cardValues);
+  const grid = document.createElement('div'); grid.style.display='grid'; grid.style.gridTemplateColumns='repeat(4,80px)'; grid.style.gap='10px'; gameContainer.appendChild(grid);
+  let firstCard=null,lock=false,matches=0;
+  cardValues.forEach(val=>{
+    const card=document.createElement('div'); card.className='memory-card'; card.dataset.value=val;
+    card.style.width='80px'; card.style.height='80px'; card.style.display='flex'; card.style.alignItems='center'; card.style.justifyContent='center'; card.style.fontSize='2rem'; card.style.background='#444'; card.style.color='transparent'; card.style.cursor='pointer'; card.innerText=val;
+    card.onclick=()=>{
+      if(lock||card.classList.contains('matched')) return;
+      card.style.color='#fff';
+      if(!firstCard){firstCard=card;}else{
+        if(firstCard.dataset.value===card.dataset.value && firstCard!==card){
+          firstCard.classList.add('matched'); card.classList.add('matched'); matches++; firstCard=null;
+          if(matches===4){scores.push({game:4,score:25}); setTimeout(()=>{alert('Great! All pairs matched.'); nextGame();},500);}
+        }else{lock=true; setTimeout(()=>{firstCard.style.color='transparent'; card.style.color='transparent'; firstCard=null; lock=false;},1000);}
+      }
     };
-    const LONG = new Set([5,8,12]);
+    grid.appendChild(card);
+  });
+}
 
-    function pointsFor(game, secs){
-      const th = LONG.has(game)? THRESH.long : THRESH.default;
-      if(secs<=th[0]) return 5; if(secs<=th[1]) return 4; if(secs<=th[2]) return 3; if(secs<=th[3]) return 2; return 1;
-    }
+// GAME 5 Trivia -> triggers song1
+function game5(){
+ clearGameContainer();
+ const title = document.createElement('h2'); title.innerText='Game 5: Trivia about us'; gameContainer.appendChild(title);
+ const q1 = document.createElement('p'); q1.innerText='Where did we first meet?'; gameContainer.appendChild(q1);
+ ['School','Church','Nandos'].forEach((opt,i)=>{
+   const btn=document.createElement('button'); btn.innerText=opt; gameContainer.appendChild(btn);
+   btn.onclick=()=>{
+     if(opt==='Nandos'){alert('Correct!'); scores.push({game:5,score:30}); playSong1();}else{alert('Try again.');}
+   };
+ });
+ const q2 = document.createElement('p'); q2.innerText='What’s our song?'; gameContainer.appendChild(q2);
+ ['Amazing Grace','Perfect','The Marriage Prayer'].forEach(opt=>{
+   const btn=document.createElement('button'); btn.innerText=opt; gameContainer.appendChild(btn);
+   btn.onclick=()=>{
+     if(opt==='The Marriage Prayer'){alert('Correct!'); scores.push({game:5,score:30}); playSong1();}else{alert('Try again.');}
+   };
+ });
+}
+function playSong1(){
+ const song=document.getElementById('song1'); song.play();
+ const lyrics1=[
+{"text":"[Intro]Another year has passed us by\nBeneath this endless, starry sky\nAnd holding you, I realize\nwe are growing together until we die"},
+{"text":"[Verse 1]I still recall the day we met\nA memory I won't forget\nThe perfect scene, in city center\nYou are the best thing I've found yet"},
+{"text":"[Chorus]Oh, Cuppy, you're my smiling star\nNo matter if you're near or far\nYour prays heal my pains & scars\nYou're perfect just not the way you are(ooh-ooh-ooh)"}
+];
+ let idx=0;
+ song.ontimeupdate=()=>{
+   if(idx<lyrics1.length) lyricsDiv.innerText=lyrics1[idx].text;
+ };
+ song.onended=()=>{lyricsDiv.innerText=''; nextGame();};
+}
 
-    function updateProgress(){
-      const pct = Math.round((solved/TOTAL)*100);
-      bar.style.width = pct + '%';
-      progressNote.textContent = `${solved} / ${TOTAL} solved`;
-    }
+// Placeholder for games 6-12
+function game6(){alert('Game 6 placeholder: Maze 12x12'); scores.push({game:6,score:20}); nextGame();}
+function game7(){alert('Game 7 placeholder: 7 differences'); scores.push({game:7,score:25}); nextGame();}
+function game8(){alert('Game 8 placeholder: 5-8 emoji puzzles'); scores.push({game:8,score:30}); nextGame();}
+function game9(){alert('Game 9 placeholder: Sequence builder'); scores.push({game:9,score:20}); nextGame();}
+function game10(){alert('Game 10 placeholder: 5 T/F questions'); scores.push({game:10,score:20}); nextGame();}
+function game11(){alert('Game 11 placeholder: Picture reveal'); scores.push({game:11,score:25}); nextGame();}
+function game12(){
+  alert('Game 12 placeholder: Favorite dishes quiz'); scores.push({game:12,score:30});
+  playSong2();
+}
+function playSong2(){
+ const song=document.getElementById('song2'); song.play();
+ const lyrics2=[
+{"text":"[Verse 1]Eight years have passed, it feels surreal,\nWe’re still a team, that’s quite the deal.\nIt’s like we blinked, and here we are,\nStill bickering like rockstars."},
+{"text":"[Chorus]Oh Cuppy, you drive me mad,\nBest worst teammate I ever had.\nYou steal my fries, you hog the bed,\nBut I still love the life we’ve led."}
+];
+ let idx=0;
+ song.ontimeupdate=()=>{
+   if(idx<lyrics2.length) lyricsDiv.innerText=lyrics2[idx].text;
+ };
+ song.onended=()=>{lyricsDiv.innerText=''; confetti(); gameComplete();};
+}
 
-    function showPuzzle(n){
-      document.querySelectorAll('.puzzle').forEach(el=>el.classList.remove('active'));
-      const next = document.getElementById('p'+n);
-      if(next){ next.classList.add('active'); current = n; tStart[n] = performance.now(); }
-      updateProgress();
-    }
+// Confetti
+function confetti(){alert('🎉 Confetti! 🎉');}
+function gameComplete(){
+ clearGameContainer();
+ const title=document.createElement('h2'); title.innerText='Congratulations! You completed all games.'; gameContainer.appendChild(title);
+ const scoreDiv=document.createElement('div'); scoreDiv.innerHTML='<h3>Your Scores:</h3>'+scores.map(s=>'Game '+s.game+': '+s.score).join('<br>'); gameContainer.appendChild(scoreDiv);
+}
 
-    function encourageAndNext(n, customTitle){
-      // compute time
-      const dur = Math.max(1, Math.round((performance.now() - tStart[n]) / 1000));
-      tDur[n] = dur; const pts = pointsFor(n, dur); gScore[n]=pts; const cat = CATS[n]; catScores[cat]+=pts;
-      // set modal
-      modalTitle.textContent = customTitle || 'Great job!';
-      modalBody.textContent = VERSES[(n-1)%VERSES.length];
-      modalTime.textContent = `You finished in ${dur}s → Score for this game: ${pts} / 5`;
-      overlay.classList.add('show');
-      modalClose.onclick = ()=>{
-        overlay.classList.remove('show');
-        if(n===6){ // break with song
-          breakOv.classList.add('show');
-          try { song6.currentTime = 0; song6.play(); } catch(e) {}
-        } else if(n===12){
-          // finale: banner, song, and summary
-          finalBanner.classList.add('show');
-          try { song12.currentTime = 0; song12.play(); } catch(e) {}
-          showSummary();
-        } else {
-          showPuzzle(n+1);
-        }
-      };
-    }
-
-    function markSolved(n, title){ solved = Math.max(solved, n); updateProgress(); encourageAndNext(n, title); }
-
-    // Hearts
-    (function hearts(){
-      const wrap = document.getElementById('hearts');
-      const palette = ['#ff7aa2','#ff9aa2','#ffc2d1','#e0aaff','#cba6f7','#94a3b8'];
-      for(let i=0;i<18;i++){
-        const s = document.createElement('span');
-        s.className = 'heart' + (Math.random()>0.66?' big': Math.random()<0.33?' small':'');
-        s.textContent = '❤';
-        const left = Math.random()*100; const delay = (Math.random()*-12).toFixed(2)+'s'; const dur = (10+Math.random()*10).toFixed(1)+'s';
-        s.style.left = left+'vw'; s.style.bottom = (-10 + Math.random()*40)+'vh'; s.style.animationDuration = dur; s.style.animationDelay = delay; s.style.color = palette[(Math.random()*palette.length)|0];
-        wrap.appendChild(s);
-      }
-    })();
-
-    // Start button
-    startBtn.onclick = ()=>{ startBtn.disabled=true; showPuzzle(1); };
-
-    // Break (after game 6)
-    song6.addEventListener('ended', ()=>{ cont7.disabled=false; cont7.focus(); });
-    cont7.addEventListener('click', ()=>{ breakOv.classList.remove('show'); showPuzzle(7); });
-
-    // ---------- PUZZLES ----------
-    // P1
-    function check1(){
-      const v = Number(document.getElementById('p1in').value); const msg = document.getElementById('p1msg');
-      if(v===17){ msg.innerHTML='<span class="ok">Correct!</span>'; markSolved(1,'Logic unlocked'); } else { msg.innerHTML='<span class="bad">Try again</span>'; }
-    }
-    // P2
-    function check2(){
-      const v = (document.getElementById('p2in').value||'').trim().toLowerCase(); const msg = document.getElementById('p2msg');
-      if(v==='love'){ msg.innerHTML='<span class="ok">Correct!</span>'; markSolved(2,'Words of love'); } else { msg.innerHTML='<span class="bad">Nope</span>'; }
-    }
-    // P3
-    function check3(){
-      const A = document.getElementById('a').checked; const B = document.getElementById('b').checked; const msg = document.getElementById('p3msg');
-      if((A&&!B)||(!A&&B)){ msg.innerHTML='<span class="ok">XOR = 1 ✔</span>'; markSolved(3,'Sharp thinking'); } else { msg.innerHTML='<span class="bad">XOR ≠ 1</span>'; }
-    }
-    // P4 Memory
-    const memVals = ['💖','💍','💖','💍']; let memOpen=[]; let memMatched=0;
-    function buildMemory(){
-      const grid = document.getElementById('memGrid'); grid.innerHTML=''; memOpen=[]; memMatched=0;
-      memVals.forEach((sym,idx)=>{ const d=document.createElement('button'); d.type='button'; d.className='cardx'; d.dataset.idx=idx; d.textContent='?'; d.addEventListener('click',()=>flipMem(d,sym)); grid.appendChild(d); });
-    }
-    function flipMem(el,sym){
-      if(el.classList.contains('matched')||el.classList.contains('revealed')) return; if(memOpen.length===2) return;
-      el.classList.add('revealed'); el.textContent=sym; memOpen.push({el,sym});
-      if(memOpen.length===2){ const [a,b]=memOpen; setTimeout(()=>{ if(a.sym===b.sym){ a.el.classList.add('matched'); b.el.classList.add('matched'); memMatched+=2; } else { a.el.classList.remove('revealed'); b.el.classList.remove('revealed'); a.el.textContent='?'; b.el.textContent='?'; } memOpen=[]; if(memMatched===memVals.length){ document.getElementById('p4msg').innerHTML='<span class="ok">All matched!</span>'; markSolved(4,'Memories aligned'); } }, 450); }
-    }
-
-    // P5 Path
-    const BLOCKS = new Set(['1,1','1,2','2,1']);
-    const GOAL_PATH = ['0,0','0,1','0,2','0,3','1,3','2,3','3,3'];
-    let pathProgress=[];
-    function buildPath(){
-      const grid=document.getElementById('pathGrid'); grid.innerHTML=''; pathProgress=[];
-      for(let r=0;r<4;r++){
-        for(let c=0;c<4;c++){
-          const btn=document.createElement('button'); btn.type='button'; btn.className='cell'; btn.dataset.rc=`${r},${c}`; btn.textContent='';
-          if(BLOCKS.has(`${r},${c}`)){ btn.classList.add('block'); btn.disabled=true; btn.textContent='×'; }
-          if(r===0&&c===0){ btn.classList.add('start'); btn.textContent='S'; }
-          if(r===3&&c===3){ btn.classList.add('end'); btn.textContent='E'; }
-          btn.addEventListener('click',()=>clickPath(btn)); grid.appendChild(btn);
-        }
-      }
-    }
-    function clickPath(btn){
-      const rc=btn.dataset.rc; const i=pathProgress.length;
-      if(rc!==GOAL_PATH[i]){ document.getElementById('p5msg').innerHTML='<span class="bad">Wrong step — path reset.</span>'; pathProgress=[]; document.querySelectorAll('#pathGrid .cell.path').forEach(el=>el.classList.remove('path')); return; }
-      btn.classList.add('path'); pathProgress.push(rc);
-      if(pathProgress.length===GOAL_PATH.length){ document.getElementById('p5msg').innerHTML='<span class="ok">Path found!</span>'; markSolved(5,'You found the way'); }
-    }
-
-    // P6 Sequence
-    function check6(){
-      const v=(document.querySelector('input[name="s6"]:checked')||{}).value; const msg=document.getElementById('p6msg');
-      if(v==='81'){ msg.innerHTML='<span class="ok">Correct</span>'; markSolved(6,'Patterns mastered'); } else { msg.innerHTML='<span class="bad">Nope</span>'; }
-    }
-
-    // P7 Riddle
-    function check7(){
-      const v=(document.getElementById('p7in').value||'').trim().toLowerCase(); const msg=document.getElementById('p7msg');
-      if(v==='echo'){ msg.innerHTML='<span class="ok">Correct</span>'; markSolved(7,'Wisdom speaks'); } else { msg.innerHTML='<span class="bad">Try again</span>'; }
-    }
-
-    // P8 Sliding
-    const slideEl=document.getElementById('slide'); let board=[1,2,3,4,5,6,7,8,0];
-    function isNeighbor(i,j){ const r1=Math.floor(i/3),c1=i%3,r2=Math.floor(j/3),c2=j%3; return Math.abs(r1-r2)+Math.abs(c1-c2)===1; }
-    function renderBoard(){ slideEl.innerHTML=''; board.forEach((v,idx)=>{ const d=document.createElement('button'); d.type='button'; d.className='tile'+(v===0?' blank':''); d.textContent=v===0?'':v; d.addEventListener('click',()=>move(idx)); slideEl.appendChild(d); }); }
-    function move(idx){ const z=board.indexOf(0); if(isNeighbor(idx,z)){ [board[idx],board[z]]=[board[z],board[idx]]; renderBoard(); if(solvedSlide()){ document.getElementById('p8msg').innerHTML='<span class="ok">Solved! 🎉</span>'; markSolved(8,'Pieces in place'); } } }
-    function solvedSlide(){ return board.every((v,i)=> v===(i<8? i+1:0)); }
-    function shuffleSolvable(moves=120){ board=[1,2,3,4,5,6,7,8,0]; let z=8; for(let k=0;k<moves;k++){ const nbs=[]; if(z%3>0) nbs.push(z-1); if(z%3<2) nbs.push(z+1); if(z>=3) nbs.push(z-3); if(z<6) nbs.push(z+3); const pick=nbs[(Math.random()*nbs.length)|0]; [board[z],board[pick]]=[board[pick],board[z]]; z=pick; } renderBoard(); }
-
-    // P9
-    function check9(){ const v=(document.getElementById('p9in').value||'').trim().toLowerCase(); const msg=document.getElementById('p9msg'); if(v==='four' || v==='4'){ msg.innerHTML='<span class="ok">Correct</span>'; markSolved(9,'Counting on you'); } else { msg.innerHTML='<span class="bad">Try again</span>'; } }
-
-    // P10
-    function check10(){ const v=(document.querySelector('input[name="t10"]:checked')||{}).value; const msg=document.getElementById('p10msg'); if(v==='true'){ msg.innerHTML='<span class="ok">Correct</span>'; markSolved(10,'Truth affirmed'); } else { msg.innerHTML='<span class="bad">Nope</span>'; } }
-
-    // P11
-    function check11(){ const v=(document.getElementById('p11in').value||'').trim().toLowerCase(); const msg=document.getElementById('p11msg'); if(['wedding','marriage'].includes(v)){ msg.innerHTML='<span class="ok">Correct</span>'; markSolved(11,'Love decoded'); } else { msg.innerHTML='<span class="bad">Try again</span>'; } }
-
-    // P12 final code
-    function check12(){ const v=(document.getElementById('p12in').value||'').trim().toLowerCase(); const msg=document.getElementById('p12msg'); if(v==='forever'){ msg.innerHTML='<span class="ok">Unlocked</span>'; markSolved(12,'Forever sealed'); } else { msg.innerHTML='<span class="bad">Hint: 7 letters…</span>'; } }
-
-    // Observe section changes to lazy-init certain games
-    const observer=new MutationObserver(()=>{ const active=document.querySelector('.puzzle.active'); if(!active) return; if(active.id==='p4') buildMemory(); if(active.id==='p5') buildPath(); if(active.id==='p8' && slideEl.childElementCount===0) shuffleSolvable(); });
-    observer.observe(document.body,{subtree:true,attributes:true,attributeFilter:['class']});
-
-    // Summary at end
-    function showSummary(){
-      // Build summary HTML
-      let total=0; for(const k in gScore) total+=gScore[k]||0;
-      const max=TOTAL*5;
-      const lines=[
-        `<strong>Total Score:</strong> ${total} / ${max}`,
-        `<strong>Breakdown by Category</strong>`,
-        `Speed: ${catScores.Speed}`,
-        `Accuracy: ${catScores.Accuracy}`,
-        `Memory: ${catScores.Memory}`,
-        `Creativity: ${catScores.Creativity}`,
-        `Dedication: ${catScores.Dedication}`
-      ];
-      modalTitle.textContent = 'Congratulations, beloved wife! 🥂';
-      modalBody.innerHTML = `You completed all ${TOTAL} games. ${VERSES[8]}<br><br>${lines.map(l=>`<div>${l}</div>`).join('')}`;
-      modalTime.textContent = '';
-      overlay.classList.add('show');
-      modalClose.textContent = 'Celebrate again';
-      modalClose.onclick = ()=>{ overlay.classList.remove('show'); };
-    }
-
-    // Boot
-    function init(){ updateProgress(); }
-    init();
-  </script>
+runGame();
+</script>
 </body>
 </html>
