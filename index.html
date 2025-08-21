@@ -182,14 +182,17 @@ const catScores = {'Logic / Puzzles':0,'Memory / Observation':0,'Word / Trivia':
 const gameResult = {}; // game -> {secs, points}
 
 // simple point function: 5 -> best, 1 -> slow
-function pointsFor(game, secs){
-  // longer puzzles: 5, 20, 40, 75 thresholds
-  const longer = new Set([5,6,8,12]);
-  const th = longer.has(game) ? [15,30,60,120] : [5,12,25,60];
-  if(secs <= th[0]) return 5;
-  if(secs <= th[1]) return 4;
-  if(secs <= th[2]) return 3;
-  if(secs <= th[3]) return 2;
+function pointsFor(gameNum, secs) {
+  // Different thresholds per type of game (you can tune)
+  let fast = 5, medium = 12, slow = 20;
+
+  // Example: puzzle and math are harder → adjust thresholds
+  if ([2,3].includes(gameNum)) { fast = 10; medium = 25; slow = 40; }
+
+  if (secs <= fast) return 5;
+  if (secs <= medium) return 4;
+  if (secs <= slow) return 3;
+  if (secs <= slow*2) return 2;
   return 1;
 }
 
@@ -1003,18 +1006,21 @@ function buildGame12(){
       const sel = document.querySelector(`input[name="dish${idx}"]:checked`);
       if(sel && sel.value === it.a) correct++;
     });
-    if(correct === qs.length){
-      const secs = stopTimer(12); const pts = pointsFor(12,secs);
-      showWin(12,secs,pts);
-    } else {
-      document.getElementById('dishNote').innerHTML = `<span style="color:${'var(--bad)'}">You got ${correct}/${qs.length} right. Try again!</span>`;
-    }
+   if(correct === qs.length){
+  const secs = stopTimer(12); 
+  const pts = pointsFor(12,secs);
+  showWin(12,secs,pts);
+
+  // Play the final song + lyrics, then move to results
+  playAudio12();
+} else {
+  document.getElementById('dishNote').innerHTML = `<span style="color:${'var(--bad)'}">You got ${correct}/${qs.length} right. Try again!</span>`;
+}
   });
 }
 
 /* ---------- Final Results & Chart ---------- */
 function displayResults(){
-  // hide lyrics, audio
   document.getElementById('lyrics').innerText = '';
   clearStage();
   const container = document.createElement('div');
@@ -1027,6 +1033,7 @@ function displayResults(){
   const total = Object.values(gameResult).reduce((s, g)=> s + (g ? g.pts : 0), 0);
   const totalPanel = document.createElement('div'); totalPanel.className='panel';
   totalPanel.innerHTML = `<h3>Total Score</h3><div style="font-size:28px;font-weight:800">${total} pts</div>`;
+
   // per-game list
   const listPanel = document.createElement('div'); listPanel.className='panel';
   let listHtml = '<h3>Per Game</h3>';
@@ -1038,7 +1045,7 @@ function displayResults(){
 
   // category calculation
   const categoryScores = {};
-  let maxPerCat = {};
+  const maxPerCat = {};
   for(const cat in CATEGORIES){
     const games = CATEGORIES[cat];
     categoryScores[cat] = games.reduce((sum,g)=> sum + ((gameResult[g]||{pts:0}).pts), 0);
@@ -1057,7 +1064,6 @@ function displayResults(){
   // draw chart
   const ctx = document.getElementById('catChart').getContext('2d');
   const keys = Object.keys(categoryScores);
-  const max = Math.max(...Object.values(maxPerCat));
   ctx.clearRect(0,0,520,260);
   keys.forEach((k,i)=>{
     const val = categoryScores[k];
@@ -1073,11 +1079,8 @@ function displayResults(){
     ctx.fillText(`${val}/${maxPerCat[k]}`, x, 190-barH);
   });
 
-  
-  // confetti
+  // confetti + banner
   startConfetti();
-
-  // final banner visible
   finalBanner.style.bottom = '0px';
 }
 
@@ -1128,6 +1131,7 @@ window.showWin = showWin;
 </script>
 </body>
 </html>
+
 
 
 
