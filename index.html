@@ -807,50 +807,99 @@ function buildGame7() {
 
 /* ---------- Game 8: Emoji puzzles (5 puzzles, some biblical) ---------- */
 function buildGame8(){
-  const puzzles = [
-    {em:"⛪👰🤵", ans:"Church Wedding"},
-    {em:"❤️⌛", ans:"Love Endures"},
-    {em:"🤲🕊️", ans:"Praying to the Holy Spirit"},
-    {em:"🕯️🙏❤️", ans:"Faith Hope Love"},
-    {em:"🌾 🍞 🍷", ans:"Holy Communion"} // biblical 
-  ];
-  let idx = 0;
-  const box = document.createElement('div');
-  box.innerHTML = `<h2>8) Emoji Puzzles</h2><p>Solve each emoji clue (type a short answer).</p>
-    <div id="emojiArea" style="font-size:28px;font-weight:700;margin:8px"></div>
-    <input id="emojiAns" type="text" placeholder="Type answer..."><button class="btn primary" id="emojiCheck">Check</button>
-    <div class="note" id="emojiNote"></div>`;
-  stage.appendChild(box);
-  startTimer(8);
-  const area = document.getElementById('emojiArea');
-  const ans = document.getElementById('emojiAns');
-  const check = document.getElementById('emojiCheck');
-  const note = document.getElementById('emojiNote');
+const puzzles = [
+{ em: "⛪👰🤵", ans: "Church Wedding" },
+{ em: "❤️⌛", ans: "Love Endures" },
+{ em: "🤲🕊️", ans: "Praying to the Holy Spirit" },
+{ em: "🕯️🙏❤️", ans: "Faith Hope Love" },
+{ em: "🌾 🍞 🍷", ans: "Holy Communion" } // biblical
+];
 
-  function show(){
-    area.textContent = puzzles[idx].em;
-    ans.value = '';
+let idx = 0;
+
+const box = document.createElement('div');
+box.innerHTML = <h2>8) Emoji Puzzles</h2> <p>Solve each emoji clue (type a short answer).</p> <div id="emojiArea" style="font-size:28px;font-weight:700;margin:8px"></div> <input id="emojiAns" type="text" placeholder="Type answer..." /> <button class="btn primary" id="emojiCheck">Check</button> <div class="note" id="emojiNote"></div> ;
+stage.appendChild(box);
+startTimer(8);
+
+const area = document.getElementById('emojiArea');
+const ans = document.getElementById('emojiAns');
+const check = document.getElementById('emojiCheck');
+const note = document.getElementById('emojiNote');
+
+function show(){
+area.textContent = puzzles[idx].em;
+ans.value = '';
+note.textContent = '';
+ans.focus();
+}
+
+// normalize: lowercase, strip non-alphanumerics, collapse spaces
+function norm(s){
+return (s || '')
+.toLowerCase()
+.replace(/[^a-z0-9]+/g, ' ')
+.trim()
+.replace(/\s+/g, ' ');
+}
+
+// acceptable variants for each correct answer
+const aliases = {
+'church wedding': ['church marriage','wedding at church'],
+'love endures': ['enduring love'],
+'praying to the holy spirit': ['prayer to holy spirit','holy spirit prayer','praying to holy spirit'],
+'faith hope love': ['faith hope and love','faith, hope and love'],
+'holy communion': ['communion','eucharist','holy eucharist']
+};
+
+function isCorrect(userRaw, correctRaw){
+const user = norm(userRaw);
+const correct = norm(correctRaw);
+if (!user) return false;
+
+// exact or contains the normalized correct phrase
+if (user === correct || user.includes(correct)) return true;
+
+// check aliases
+const al = aliases[correct] || [];
+for (const a of al){
+  const na = norm(a);
+  if (user === na || user.includes(na)) return true;
+}
+return false;
+}
+
+check.addEventListener('click', ()=>{
+const raw = (ans.value || '').trim();
+if(!raw){
+note.textContent = 'Type something.';
+return;
+}
+
+
+const ok = isCorrect(raw, puzzles[idx].ans);
+
+if(ok){
+  idx++;
+  if(idx >= puzzles.length){
+    const secs = stopTimer(8);
+    const pts = pointsFor(8, secs);
+    showWin(8, secs, pts);
+  } else {
+    note.textContent = 'Correct — next puzzle!';
+    show();
   }
-  check.addEventListener('click', ()=>{
-    const v = (ans.value||'').trim().toLowerCase();
-    if(!v){ return note.textContent='Type something.'; }
-    // simple normalization and check contains keywords
-    const ok = puzzles[idx].ans.split(' ').every(w=> v.includes(w.split('').slice(0,3).join('')) || v.includes(w));
-    if(ok){
-      idx++;
-      if(idx >= puzzles.length){
-        const secs = stopTimer(8);
-        const pts = pointsFor(8,secs);
-        showWin(8,secs,pts);
-      } else {
-        note.textContent = 'Correct — next puzzle!';
-        show();
-      }
-    } else {
-      note.textContent = 'Not right — try another phrase.';
-    }
-  });
-  show();
+} else {
+  note.textContent = 'Not right — try another phrase.';
+}
+});
+
+// also submit on Enter
+ans.addEventListener('keydown', (e)=>{
+if(e.key === 'Enter') check.click();
+});
+
+show();
 }
 
 /* ---------- Game 9: Sequence puzzle ---------- */
@@ -1081,6 +1130,7 @@ window.showWin = showWin;
 </script>
 </body>
 </html>
+
 
 
 
