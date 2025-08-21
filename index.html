@@ -515,67 +515,71 @@ function buildGame4(){
 }
 
 /* ---------- Game 5: Trivia (two questions). Play call123.mp3 after both correct. ---------- */
-function buildGame5(){
+function buildGame5() {
   stage.innerHTML = ''; // clear previous game
 
   const box = document.createElement('div');
   box.innerHTML = `<h2>5) Trivia — About Us</h2>
-   <div style="text-align:left;max-width:720px;margin:0 auto">
-    <p><strong>1)</strong> Where did we first meet?</p>
-    <label><input type="radio" name="q1" value="school"> School</label><br>
-    <label><input type="radio" name="q1" value="church"> Church</label><br>
+
+  <div style="text-align:left;max-width:720px;margin:0 auto"> 
+    <p><strong>1)</strong> Where did we first meet?</p> 
+    <label><input type="radio" name="q1" value="school"> School</label><br> 
+    <label><input type="radio" name="q1" value="church"> Church</label><br> 
     <label><input type="radio" name="q1" value="nandos"> Nandos</label>
+
     <p><strong>2)</strong> What’s our song?</p>
     <label><input type="radio" name="q2" value="amazing"> Amazing Grace</label><br>
     <label><input type="radio" name="q2" value="perfect"> Perfect</label><br>
     <label><input type="radio" name="q2" value="marriage"> The Marriage Prayer</label>
-    <div style="margin-top:12px"><button class="btn primary" id="check5">Check Answers</button></div>
-   </div>
-  `;
-  stage.appendChild(box);
+
+    <div style="margin-top:12px">
+      <button class="btn primary" id="check5">Check Answers</button>
+    </div>
+  </div> 
+  <div id="lyrics" style="margin-top:20px;font-size:18px;text-align:center;white-space:pre-line;color:white;min-height:60px"></div>
+  `; 
+
+  stage.appendChild(box); 
   startTimer(5);
 
-  const audio5 = document.getElementById('audio5');
+  document.getElementById('check5').addEventListener('click', () => {
+    const q1 = document.querySelector('input[name="q1"]:checked');
+    const q2 = document.querySelector('input[name="q2"]:checked');
 
-  document.getElementById('check5').addEventListener('click', ()=>{
-const q1 = document.querySelector('input[name="q1"]:checked');
-const q2 = document.querySelector('input[name="q2"]:checked');
+    if (!q1 || !q2) {
+      alert('Please answer both questions.');
+      return;
+    }
 
-if(!q1 || !q2){
-alert('Please answer both questions.');
-return;
+    const ok1 = (q1.value === 'nandos');
+    const ok2 = (q2.value === 'marriage');
+
+    if (ok1 && ok2) {
+      const secs = stopTimer(5);
+      const pts = pointsFor(5, secs);
+
+      // Show modal first
+      nextAfterModal = 'post-song5'; // flag to start game6 after song
+      document.getElementById('modalTitle').textContent = 'Well done!';
+      document.getElementById('modalBody').textContent = 'You got both answers correct!';
+      document.getElementById('modalTime').textContent = `Time: ${secs} sec, Points: ${pts}`;
+      overlay.classList.add('show');
+
+      // Play song + show lyrics
+      playAudio5();
+
+    } else {
+      alert('One or both answers are not correct. Try again.');
+    }
+  });
 }
 
-const ok1 = (q1.value === 'nandos');
-const ok2 = (q2.value === 'marriage');
-
-if(ok1 && ok2){
-const secs = stopTimer(5);
-const pts = pointsFor(5, secs);
-
-
-// Show modal first
-nextAfterModal = 'post-song5'; // flag to start game6 after song
-document.getElementById('modalTitle').textContent = 'Well done!';
-document.getElementById('modalBody').textContent = 'You got both answers correct!';
-document.getElementById('modalTime').textContent = `Time: ${secs} sec, Points: ${pts}`;
-overlay.classList.add('show');
-
-// Use the centralized audio + subtitles flow
-playAudio5();
-} else {
-alert('One or both answers are not correct. Try again.');
-}
-});
-
-
-/* ---------- Audio & Lyrics handling (block-by-block) ---------- */
-const lyricsDiv = document.getElementById("lyrics");
 const lyricBlockDuration = 6000; // ms per block shown
 
-// ---------- SONG after Game 5 ----------
 function playAudio5() {
   const a = document.getElementById("audio5");
+  const lyricsDiv = document.getElementById("lyrics");
+
   const blocks = [
     "[Intro] Another year has passed us by\nBeneath this endless, starry sky\nAnd holding you, I realize\nWe are growing together until we die",
     "[Verse 1] I still recall the day we met\nA memory I won't forget\nThe perfect scene, in city center\nYou are the best thing I've found yet",
@@ -586,58 +590,59 @@ function playAudio5() {
     "[Outro] Happy anniversary, my love\nA gift sent from the stars above\nMy precious, gentle, sweet white dove\nIt's you I'm always thinking of"
   ];
 
-  displayLyrics(blocks, a, () => startGame(6)); // continue only AFTER song finishes
+  displayLyrics(blocks, a, () => startGame(6), lyricsDiv);
+
+  a.currentTime = 0;
   a.play().catch(()=>{});
 }
 
-// ---------- SONG after Game 12 ----------
-function playAudio12() {
-  const a = document.getElementById("audio12");
-  const blocks = [
-    "[Verse 1] Eight years have passed, it feels surreal,\nWe’re still a team, that’s quite the deal.\nIt’s like we blinked, and here we are,\nStill bickering like rockstars.",
-    "[Pre-Chorus] You nap away while I freak out,\nI do the work, you joke about.\nBut every time you flash that grin,\nI can’t help falling back again.",
-    "[Chorus] Oh Cuppy, you drive me mad,\nBest worst teammate I ever had.\nYou steal my fries, you hog the bed,\nBut I still love the life we’ve led.\nOh darling, it’s plain to see,\nYou’re the joker and a part of me.\nEight years gone, but I still choose—\nBut, feels like yesterday I met you.",
-    "[Verse 2] You say you’ll help, but then you bail,\nI carry boxes, you check the mail.\nYet when the world feels way too loud,\nYou’re the calm within the crowd.",
-    "[Pre-Chorus] You snore away, I stay awake,\nBut somehow that’s the perfect shake.\nAnd every time you roll your eyes,\nYou’re still my favorite sweet surprise.",
-    "[Chorus] Oh Cuppy, you drive me mad,\nBest worst teammate I ever had.\nYou steal my fries, you hog the bed,\nBut I still love the life we’ve led.\nOh darling, it’s plain to see,\nYou’re the joker and a part of me.\nEight years gone, but I still choose—\nBut, feels like yesterday I met you.",
-    "[Bridge] We’ve had our fights, we’ve had our quirks,\nWe’ve swapped romance for Netflix works.\nBut every laugh, each silly thing,\nIs better than a tesla car.",
-    "[Final Chorus] Oh Cuppy, you drive me mad,\nBest worst teammate I ever had.\nFrom day one, to season eight,\nYou’re the best mistake I’ll celebrate.\nOh darling, it’s plain to see,\nYou’re the quirkiest part of me.\nEight years strong, and still it’s true—\nI’d be empty without you."
-  ];
+  function playAudio12() {
+const a = document.getElementById("audio12");
+const blocks = [
+"[Verse 1] Eight years have passed, it feels surreal,\nWe’re still a team, that’s quite the deal.\nIt’s like we blinked, and here we are,\nStill bickering like rockstars.",
+"[Pre-Chorus] You nap away while I freak out,\nI do the work, you joke about.\nBut every time you flash that grin,\nI can’t help falling back again.",
+"[Chorus] Oh Cuppy, you drive me mad,\nBest worst teammate I ever had.\nYou steal my fries, you hog the bed,\nBut I still love the life we’ve led.\nOh darling, it’s plain to see,\nYou’re the joker and a part of me.\nEight years gone, but I still choose—\nBut, feels like yesterday I met you.",
+"[Verse 2] You say you’ll help, but then you bail,\nI carry boxes, you check the mail.\nYet when the world feels way too loud,\nYou’re the calm within the crowd.",
+"[Pre-Chorus] You snore away, I stay awake,\nBut somehow that’s the perfect shake.\nAnd every time you roll your eyes,\nYou’re still my favorite sweet surprise.",
+"[Chorus] Oh Cuppy, you drive me mad,\nBest worst teammate I ever had.\nYou steal my fries, you hog the bed,\nBut I still love the life we’ve led.\nOh darling, it’s plain to see,\nYou’re the joker and a part of me.\nEight years gone, but I still choose—\nBut, feels like yesterday I met you.",
+"[Bridge] We’ve had our fights, we’ve had our quirks,\nWe’ve swapped romance for Netflix works.\nBut every laugh, each silly thing,\nIs better than a tesla car.",
+"[Final Chorus] Oh Cuppy, you drive me mad,\nBest worst teammate I ever had.\nFrom day one, to season eight,\nYou’re the best mistake I’ll celebrate.\nOh darling, it’s plain to see,\nYou’re the quirkiest part of me.\nEight years strong, and still it’s true—\nI’d be empty without you."
+];
 
-  displayLyrics(blocks, a, () => displayResults()); // finish the journey
-  a.play().catch(()=>{});
+displayLyrics(blocks, a, () => displayResults()); // finish the journey
+a.currentTime = 0;
+a.play().catch(()=>{});
 }
+  
+function displayLyrics(blocks, audioEl, onEnd, lyricsDiv) {
+  let i = 0;
+  lyricsDiv.innerText = blocks[0] || '';
 
-// ---------- Generic lyric handler ----------
-function displayLyrics(blocks, audioEl, onEnd) {
-let i = 0;
-lyricsDiv.innerText = blocks || '';
+  // Clear any previous interval tied to this audio element
+  if (audioEl._lyricsIntervalId) {
+    clearInterval(audioEl._lyricsIntervalId);
+    audioEl._lyricsIntervalId = null;
+  }
 
-// Clear any previous interval tied to this audio element
-if (audioEl._lyricsIntervalId) {
-clearInterval(audioEl._lyricsIntervalId);
-audioEl._lyricsIntervalId = null;
-}
+  const interval = setInterval(() => {
+    i++;
+    if (i < blocks.length) {
+      lyricsDiv.innerText = blocks[i];
+    } else {
+      clearInterval(interval);
+      audioEl._lyricsIntervalId = null;
+    }
+  }, lyricBlockDuration);
+  audioEl._lyricsIntervalId = interval;
 
-const interval = setInterval(() => {
-i++;
-if (i < blocks.length) {
-lyricsDiv.innerText = blocks[i];
-} else {
-clearInterval(interval);
-audioEl._lyricsIntervalId = null;
-}
-}, lyricBlockDuration);
-audioEl._lyricsIntervalId = interval;
-
-audioEl.onended = () => {
-if (audioEl._lyricsIntervalId) {
-clearInterval(audioEl._lyricsIntervalId);
-audioEl._lyricsIntervalId = null;
-}
-lyricsDiv.innerText = '';
-onEnd();
-};
+  audioEl.onended = () => {
+    if (audioEl._lyricsIntervalId) {
+      clearInterval(audioEl._lyricsIntervalId);
+      audioEl._lyricsIntervalId = null;
+    }
+    lyricsDiv.innerText = '';
+    onEnd();
+  };
 }
 
 
@@ -1076,6 +1081,7 @@ window.showWin = showWin;
 </script>
 </body>
 </html>
+
 
 
 
