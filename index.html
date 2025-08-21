@@ -564,8 +564,7 @@ function buildGame5() {
       document.getElementById('modalBody').textContent = 'You got both answers correct!';
       document.getElementById('modalTime').textContent = `Time: ${secs} sec, Points: ${pts}`;
       overlay.classList.add('show');
-
-      // Play song + show lyrics
+      overlay.classList.remove('show'); // close modal so lyrics are visible
       playAudio5();
 
     } else {
@@ -577,23 +576,24 @@ function buildGame5() {
 const lyricBlockDuration = 6000; // ms per block shown
 
 function playAudio5() {
-  const a = document.getElementById("audio5");
-  const lyricsDiv = document.getElementById("lyrics");
+const a = document.getElementById("audio5");
+const lyricsDiv = document.getElementById("lyrics");
+if (!a) { console.warn('audio5 not found'); return; }
+if (!lyricsDiv) { console.warn('lyrics container not found'); return; }
 
-  const blocks = [
-    "[Intro] Another year has passed us by\nBeneath this endless, starry sky\nAnd holding you, I realize\nWe are growing together until we die",
-    "[Verse 1] I still recall the day we met\nA memory I won't forget\nThe perfect scene, in city center\nYou are the best thing I've found yet",
-    "[Chorus] Oh, Cuppy, you're my smiling star\nNo matter if you're near or far\nYour prays heal my pains & scars\nYou're perfect just not the way you are (ooh-ooh-ooh)",
-    "[Verse 2] In God we have a life and made a home\nNo matter where we choose to roam\nThrough every chapter, every poem\nWith you, I'm not alone",
-    "[Chorus] Oh, Cuppy, you're my smiling star\nNo matter if you're near or far\nYour prays heal my pains & scars\nYou're perfect just not the way you are (ooh-ooh-ooh)",
-    "[Bridge] So let's raise a glass to all our years\nTo all the smiles and all the tears\nYou chase away my doubts and fears\nMy love, for you, my heart still cheers",
-    "[Outro] Happy anniversary, my love\nA gift sent from the stars above\nMy precious, gentle, sweet white dove\nIt's you I'm always thinking of"
-  ];
+const blocks = [
+"[Intro] Another year has passed us by\nBeneath this endless, starry sky\nAnd holding you, I realize\nWe are growing together until we die",
+"[Verse 1] I still recall the day we met\nA memory I won't forget\nThe perfect scene, in city center\nYou are the best thing I've found yet",
+"[Chorus] Oh, Cuppy, you're my smiling star\nNo matter if you're near or far\nYour prays heal my pains & scars\nYou're perfect just not the way you are (ooh-ooh-ooh)",
+"[Verse 2] In God we have a life and made a home\nNo matter where we choose to roam\nThrough every chapter, every poem\nWith you, I'm not alone",
+"[Chorus] Oh, Cuppy, you're my smiling star\nNo matter if you're near or far\nYour prays heal my pains & scars\nYou're perfect just not the way you are (ooh-ooh-ooh)",
+"[Bridge] So let's raise a glass to all our years\nTo all the smiles and all the tears\nYou chase away my doubts and fears\nMy love, for you, my heart still cheers",
+"[Outro] Happy anniversary, my love\nA gift sent from the stars above\nMy precious, gentle, sweet white dove\nIt's you I'm always thinking of"
+];
 
-  displayLyrics(blocks, a, () => startGame(6), lyricsDiv);
-
-  a.currentTime = 0;
-  a.play().catch(()=>{});
+displayLyrics(blocks, a, () => startGame(6), lyricsDiv);
+a.currentTime = 0;
+a.play().catch(()=>{});
 }
 
   function playAudio12() {
@@ -1081,6 +1081,7 @@ window.showWin = showWin;
 </script>
 </body>
 </html>
+
 
 
 
