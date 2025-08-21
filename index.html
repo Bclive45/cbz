@@ -557,15 +557,8 @@ function buildGame5(){
       document.getElementById('modalTime').textContent = `Time: ${secs} sec, Points: ${pts}`;
       overlay.classList.add('show');
 
-      // Play audio
-      audio5.currentTime = 0;
-      audio5.play();
-      audio5.onended = () => {
-        // When song ends, automatically close modal
-        overlay.classList.remove('show');
-        if(nextAfterModal === 'post-song5'){
-          nextAfterModal = null;
-          startGame(6); // move to game 6
+      // Use the centralized audio + subtitles flow
+      playAudio5();
         }
       };
 
@@ -618,7 +611,13 @@ function playAudio12() {
 // ---------- Generic lyric handler ----------
 function displayLyrics(blocks, audioEl, onEnd) {
   let i = 0;
-  lyricsDiv.innerText = blocks[0] || '';
+  lyricsDiv.innerText = blocks || '';
+
+  // Clear any previous interval tied to this audio element
+  if (audioEl._lyricsIntervalId) {
+    clearInterval(audioEl._lyricsIntervalId);
+    audioEl._lyricsIntervalId = null;
+  }
 
   const interval = setInterval(() => {
     i++;
@@ -626,15 +625,21 @@ function displayLyrics(blocks, audioEl, onEnd) {
       lyricsDiv.innerText = blocks[i];
     } else {
       clearInterval(interval);
+      audioEl._lyricsIntervalId = null;
     }
   }, lyricBlockDuration);
+  audioEl._lyricsIntervalId = interval;
 
   audioEl.onended = () => {
-    clearInterval(interval);
+    if (audioEl._lyricsIntervalId) {
+      clearInterval(audioEl._lyricsIntervalId);
+      audioEl._lyricsIntervalId = null;
+    }
     lyricsDiv.innerText = '';
     onEnd();
   };
 }
+
 
 /* ---------- Game 6: Maze 12x12 (click cells to create path along predefined path) ---------- */
 function buildGame6(){
@@ -1071,6 +1076,7 @@ window.showWin = showWin;
 </script>
 </body>
 </html>
+
 
 
 
