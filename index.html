@@ -538,35 +538,35 @@ function buildGame5(){
   const audio5 = document.getElementById('audio5');
 
   document.getElementById('check5').addEventListener('click', ()=>{
-    const q1 = document.querySelector('input[name="q1"]:checked');
-    const q2 = document.querySelector('input[name="q2"]:checked');
-    if(!q1 || !q2){
-      alert('Please answer both questions.');
-      return;
-    }
-    const ok1 = (q1.value === 'nandos');
-    const ok2 = (q2.value === 'marriage');
-    if(ok1 && ok2){
-      const secs = stopTimer(5);
-      const pts = pointsFor(5, secs);
-      
-      // Show modal first
-      nextAfterModal = 'post-song5'; // flag to start game6 after song
-      document.getElementById('modalTitle').textContent = 'Well done!';
-      document.getElementById('modalBody').textContent = `You got both answers correct!`;
-      document.getElementById('modalTime').textContent = `Time: ${secs} sec, Points: ${pts}`;
-      overlay.classList.add('show');
+const q1 = document.querySelector('input[name="q1"]:checked');
+const q2 = document.querySelector('input[name="q2"]:checked');
 
-      // Use the centralized audio + subtitles flow
-      playAudio5();
-        }
-      };
-
-    } else {
-      alert('One or both answers are not correct. Try again.');
-    }
-  });
+if(!q1 || !q2){
+alert('Please answer both questions.');
+return;
 }
+
+const ok1 = (q1.value === 'nandos');
+const ok2 = (q2.value === 'marriage');
+
+if(ok1 && ok2){
+const secs = stopTimer(5);
+const pts = pointsFor(5, secs);
+
+
+// Show modal first
+nextAfterModal = 'post-song5'; // flag to start game6 after song
+document.getElementById('modalTitle').textContent = 'Well done!';
+document.getElementById('modalBody').textContent = 'You got both answers correct!';
+document.getElementById('modalTime').textContent = `Time: ${secs} sec, Points: ${pts}`;
+overlay.classList.add('show');
+
+// Use the centralized audio + subtitles flow
+playAudio5();
+} else {
+alert('One or both answers are not correct. Try again.');
+}
+});
 
 
 /* ---------- Audio & Lyrics handling (block-by-block) ---------- */
@@ -610,34 +610,34 @@ function playAudio12() {
 
 // ---------- Generic lyric handler ----------
 function displayLyrics(blocks, audioEl, onEnd) {
-  let i = 0;
-  lyricsDiv.innerText = blocks || '';
+let i = 0;
+lyricsDiv.innerText = blocks || '';
 
-  // Clear any previous interval tied to this audio element
-  if (audioEl._lyricsIntervalId) {
-    clearInterval(audioEl._lyricsIntervalId);
-    audioEl._lyricsIntervalId = null;
-  }
+// Clear any previous interval tied to this audio element
+if (audioEl._lyricsIntervalId) {
+clearInterval(audioEl._lyricsIntervalId);
+audioEl._lyricsIntervalId = null;
+}
 
-  const interval = setInterval(() => {
-    i++;
-    if (i < blocks.length) {
-      lyricsDiv.innerText = blocks[i];
-    } else {
-      clearInterval(interval);
-      audioEl._lyricsIntervalId = null;
-    }
-  }, lyricBlockDuration);
-  audioEl._lyricsIntervalId = interval;
+const interval = setInterval(() => {
+i++;
+if (i < blocks.length) {
+lyricsDiv.innerText = blocks[i];
+} else {
+clearInterval(interval);
+audioEl._lyricsIntervalId = null;
+}
+}, lyricBlockDuration);
+audioEl._lyricsIntervalId = interval;
 
-  audioEl.onended = () => {
-    if (audioEl._lyricsIntervalId) {
-      clearInterval(audioEl._lyricsIntervalId);
-      audioEl._lyricsIntervalId = null;
-    }
-    lyricsDiv.innerText = '';
-    onEnd();
-  };
+audioEl.onended = () => {
+if (audioEl._lyricsIntervalId) {
+clearInterval(audioEl._lyricsIntervalId);
+audioEl._lyricsIntervalId = null;
+}
+lyricsDiv.innerText = '';
+onEnd();
+};
 }
 
 
@@ -1076,6 +1076,7 @@ window.showWin = showWin;
 </script>
 </body>
 </html>
+
 
 
 
