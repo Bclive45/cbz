@@ -325,13 +325,12 @@ function buildGame2() {
   `;
   stage.appendChild(box);
 
-  const SIZE = 2; // 4x4 puzzle
+  const SIZE = 2; // 2x2 puzzle
   const img = 'wedding1.jpg';
-  const tileSize = 80; // pixel size per tile
+  const tileSize = 200; // bigger tile size for visibility
   let emptyPos = { x: SIZE - 1, y: SIZE - 1 }; // bottom-right empty
   let tiles = [];
 
-  // Create puzzle container
   const puzzle = document.createElement('div');
   puzzle.style.width = `${tileSize * SIZE}px`;
   puzzle.style.height = `${tileSize * SIZE}px`;
@@ -359,14 +358,11 @@ function buildGame2() {
     }
   }
 
-  // Shuffle tiles
-  function shuffle() {
-    for (let i = 0; i < 1000; i++) {
-      const movable = tiles.filter(t => isAdjacent(t, emptyPos));
-      const t = movable[Math.floor(Math.random() * movable.length)];
-      moveTile(t);
-    }
-  }
+  // store correct positions for win check
+  tiles.forEach(t => {
+    t.el.dataset.correctX = t.x;
+    t.el.dataset.correctY = t.y;
+  });
 
   function isAdjacent(tile, empty) {
     return (Math.abs(tile.x - empty.x) + Math.abs(tile.y - empty.y)) === 1;
@@ -379,6 +375,10 @@ function buildGame2() {
     tile.el.style.left = `${tile.x * tileSize}px`;
     tile.el.style.top = `${tile.y * tileSize}px`;
     emptyPos = tmp;
+  }
+
+  function checkWin() {
+    return tiles.every(t => t.x == t.el.dataset.correctX && t.y == t.el.dataset.correctY);
   }
 
   tiles.forEach(tile => {
@@ -395,15 +395,13 @@ function buildGame2() {
     });
   });
 
-  function checkWin() {
-    return tiles.every(t => t.x === t.el.dataset.correctX && t.y === t.el.dataset.correctY);
+  function shuffle() {
+    for (let i = 0; i < 20; i++) { // fewer moves for 2x2
+      const movable = tiles.filter(t => isAdjacent(t, emptyPos));
+      const t = movable[Math.floor(Math.random() * movable.length)];
+      moveTile(t);
+    }
   }
-
-  // store correct positions for win check
-  tiles.forEach(t => {
-    t.el.dataset.correctX = t.x;
-    t.el.dataset.correctY = t.y;
-  });
 
   startTimer(2);
   shuffle();
@@ -1028,6 +1026,7 @@ window.showWin = showWin;
 </script>
 </body>
 </html>
+
 
 
 
