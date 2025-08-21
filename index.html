@@ -102,7 +102,7 @@
       <div class="note">Progress saves only per page session. Reload resets the journey.</div>
     </div>
   </div>
-
+  <div id="lyrics" style="white-space: pre-line; text-align:center; margin-top:20px; font-size:16px; line-height:1.4; color:#333;"></div>
   <!-- hidden audios -->
   <audio id="audio5" src="call123.mp3" preload="auto" style="display:none"></audio>
   <audio id="audio12" src="345.mp3" preload="auto" style="display:none"></audio>
@@ -572,20 +572,23 @@ function buildGame5(){
 /* ---------- Audio & Lyrics handling (block-by-block) ---------- */
 const lyricBlockDuration = 8000; // default show each block for 5s (you can edit)
 function playAudio5(){
-  // show overlay will already be present; we want to play audio and display lyrics
   const a = audio5;
+  const lyricsDiv = document.getElementById('lyrics');
+
   displayLyricsFor(a, [
     "[Intro] Another year has passed us by\nBeneath this endless, starry sky\nAnd holding you, I realize\nwe are growing together until we die",
     "[Verse 1] I still recall the day we met\nA memory I won't forget\nThe perfect scene, in city center\nYou are the best thing I've found yet",
     "[Chorus] Oh, Cuppy, you're my smiling star\nNo matter if you're near or far\nYour prays heal my pains & scars\nYou're perfect just not the way you are"
   ]);
-  a.play().catch(()=>{}); // play, browsers will allow since user clicked earlier
+
+  a.play().catch(()=>{}); // play audio
+
   a.onended = ()=>{
-    // when audio ends, close modal and proceed to next game (6)
-    overlay.classList.remove('show');
-    startGame(6);
+    lyricsDiv.innerText = '';   // clear lyrics when done
+    startGame(6);               // move to next game
   };
 }
+
 function playAudio12(){
   const a = audio12;
   displayLyricsFor(a, [
@@ -1046,6 +1049,7 @@ window.showWin = showWin;
 </script>
 </body>
 </html>
+
 
 
 
