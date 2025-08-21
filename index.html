@@ -90,7 +90,7 @@
     <div class="card">
       <header>
         <h1>Happy Anniversary — Clive & Eden 💖</h1>
-        <div class="sub">A journey of love, puzzles and surprises. Play through the stages to unlock songs and blessings.</div>
+        <div class="sub">A journey of love, puzzles and surprises. Play through the stages to unlock songs and blessings. Be Fast for more points</div>
         <div class="progress" aria-hidden="true"><div class="bar" id="bar"></div></div>
         <div class="progress-note" id="progressNote">0 / 12 solved</div>
       </header>
@@ -572,8 +572,14 @@ function buildGame5(){
 /* ---------- Audio & Lyrics handling (block-by-block) ---------- */
 const lyricBlockDuration = 8000; // default show each block for 5s (you can edit)
 function playAudio5(){
+  // Hide modal immediately so lyrics can be seen
+  overlay.classList.remove('show');
+
   const a = audio5;
   const lyricsDiv = document.getElementById('lyrics');
+
+  // reset lyrics
+  lyricsDiv.innerText = '';
 
   displayLyricsFor(a, [
     "[Intro] Another year has passed us by\nBeneath this endless, starry sky\nAnd holding you, I realize\nwe are growing together until we die",
@@ -584,8 +590,8 @@ function playAudio5(){
   a.play().catch(()=>{}); // play audio
 
   a.onended = ()=>{
-    lyricsDiv.innerText = '';   // clear lyrics when done
-    startGame(6);               // move to next game
+    lyricsDiv.innerText = '';   // clear lyrics
+    startGame(6);               // move to next game only AFTER song ends
   };
 }
 
@@ -1049,6 +1055,7 @@ window.showWin = showWin;
 </script>
 </body>
 </html>
+
 
 
 
