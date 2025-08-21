@@ -313,22 +313,49 @@ function buildGame1(){
   });
 }
 
-/* ---------- Game 2: Sliding puzzle / photo match (we use simple reveal click to keep it fast) ---------- */
-function buildGame2(){
+/* ---------- Game 2: Sliding puzzle / photo match (updated) ---------- */
+function buildGame2() {
+  // Clear previous stage
+  stage.innerHTML = '';
+
   const box = document.createElement('div');
   box.innerHTML = `<h2>2) Photo Match — Oh My!!!</h2>
     <p>Confirm the wedding photo matches the memory. Tap Reveal then confirm.</p>`;
-  const img = document.createElement('img'); img.src='wedding1.jpg'; img.alt='wedding'; img.style.maxWidth='260px'; img.style.borderRadius='12px'; img.style.boxShadow='0 10px 30px rgba(0,0,0,.08)';
-  const reveal = document.createElement('button'); reveal.className='btn primary'; reveal.textContent='Reveal / Confirm';
-  const msg = document.createElement('div'); msg.className='note';
-  box.appendChild(img); box.appendChild(document.createElement('br')); box.appendChild(reveal); box.appendChild(msg);
+
+  const img = document.createElement('img');
+  img.src = 'wedding1.jpg';
+  img.alt = 'wedding';
+  img.style.maxWidth = '260px';
+  img.style.borderRadius = '12px';
+  img.style.boxShadow = '0 10px 30px rgba(0,0,0,.08)';
+  img.style.display = 'block';
+  img.style.margin = '20px auto';
+
+  const reveal = document.createElement('button');
+  reveal.className = 'btn primary';
+  reveal.textContent = 'Reveal / Confirm';
+  reveal.style.display = 'block';
+  reveal.style.margin = '20px auto';
+
+  const msg = document.createElement('div');
+  msg.className = 'note';
+  msg.style.textAlign = 'center';
+  msg.style.marginTop = '10px';
+
+  box.appendChild(img);
+  box.appendChild(reveal);
+  box.appendChild(msg);
   stage.appendChild(box);
+
   startTimer(2);
-  reveal.addEventListener('click', ()=>{
-    // assume correct for this flow (or you can add manual verification)
+
+  reveal.addEventListener('click', () => {
     const secs = stopTimer(2);
-    const pts = pointsFor(2,secs);
-    showWin(2,secs,pts);
+    const pts = pointsFor(2, secs);
+    showWin(2, secs, pts);
+
+    // Move to next game automatically
+    setTimeout(buildGame3, 500);
   });
 }
 
@@ -950,4 +977,5 @@ window.showWin = showWin;
 </script>
 </body>
 </html>
+
 
