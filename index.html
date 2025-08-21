@@ -541,6 +541,11 @@ function buildGame5(){
       const pts = pointsFor(5,secs);
       // both correct: play song and then move to next after song ends (handled in showWin)
       showWin(5,secs,pts);
+      playAudio5();
+
+      // Move to game 6 after song ends or after a delay (adjust ms as song length)
+      // Example: wait 5 seconds before starting next game
+      setTimeout(buildGame6, 95000);
     } else {
       alert('One or both answers are not correct. Try again.');
     }
@@ -591,6 +596,7 @@ function displayLyricsFor(audioEl, blocks){
 
 /* ---------- Game 6: Maze 12x12 (click cells to create path along predefined path) ---------- */
 function buildGame6(){
+  
   const size = 12;
   // create a simple path from (0,0) to (size-1,size-1)
   const path = []; // we'll generate a simple diagonal-ish path with some rights/downs
@@ -1023,6 +1029,7 @@ window.showWin = showWin;
 </script>
 </body>
 </html>
+
 
 
 
