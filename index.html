@@ -314,61 +314,101 @@ function buildGame1(){
 }
 
 /* ---------- Game 2: Sliding puzzle / photo match (updated) ---------- */
-const stage = document.getElementById('stage'); // Make sure this exists at the top of your script
-
 function buildGame2() {
+  const stage = document.getElementById('stage');
   stage.innerHTML = ''; // Clear previous game
 
   const box = document.createElement('div');
   box.innerHTML = `
-    <h2>2) Photo Match — Oh My!!!</h2>
-    <p>Confirm the wedding photo matches the memory. Tap Reveal then confirm.</p>
+    <h2>2) Sliding Puzzle — Photo Match</h2>
+    <p>Reassemble the wedding photo by sliding the tiles into the correct position.</p>
   `;
-
-  const img = document.createElement('img');
-  img.src = 'wedding1.jpg';
-  img.alt = 'wedding';
-  img.style.maxWidth = '260px';
-  img.style.borderRadius = '12px';
-  img.style.boxShadow = '0 10px 30px rgba(0,0,0,.08)';
-  img.style.display = 'block';
-  img.style.margin = '20px auto';
-
-  const reveal = document.createElement('button');
-  reveal.className = 'btn primary';
-  reveal.textContent = 'Reveal / Confirm';
-  reveal.style.display = 'block';
-  reveal.style.margin = '20px auto';
-
-  const msg = document.createElement('div');
-  msg.className = 'note';
-  msg.style.textAlign = 'center';
-  msg.style.marginTop = '10px';
-
-  box.appendChild(img);
-  box.appendChild(reveal);
-  box.appendChild(msg);
   stage.appendChild(box);
 
-  startTimer(2);
+  const SIZE = 4; // 4x4 puzzle
+  const img = 'wedding1.jpg';
+  const tileSize = 80; // pixel size per tile
+  let emptyPos = { x: SIZE - 1, y: SIZE - 1 }; // bottom-right empty
+  let tiles = [];
 
-  reveal.addEventListener('click', () => {
-    const secs = stopTimer(2);
-    const pts = pointsFor(2, secs);
+  // Create puzzle container
+  const puzzle = document.createElement('div');
+  puzzle.style.width = `${tileSize * SIZE}px`;
+  puzzle.style.height = `${tileSize * SIZE}px`;
+  puzzle.style.position = 'relative';
+  puzzle.style.margin = '20px auto';
+  puzzle.style.border = '2px solid #ccc';
+  box.appendChild(puzzle);
 
-    // Instead of showWin blocking flow, call a simple confirmation first
-    msg.textContent = `You revealed the photo! Points: ${pts}`;
+  // Initialize tiles
+  for (let y = 0; y < SIZE; y++) {
+    for (let x = 0; x < SIZE; x++) {
+      if (x === SIZE - 1 && y === SIZE - 1) continue; // skip last tile (empty)
+      const tile = document.createElement('div');
+      tile.style.width = tile.style.height = `${tileSize}px`;
+      tile.style.position = 'absolute';
+      tile.style.left = `${x * tileSize}px`;
+      tile.style.top = `${y * tileSize}px`;
+      tile.style.backgroundImage = `url(${img})`;
+      tile.style.backgroundSize = `${SIZE * tileSize}px ${SIZE * tileSize}px`;
+      tile.style.backgroundPosition = `-${x * tileSize}px -${y * tileSize}px`;
+      tile.style.border = '1px solid #fff';
+      tile.style.cursor = 'pointer';
+      puzzle.appendChild(tile);
+      tiles.push({ el: tile, x, y });
+    }
+  }
 
-    // Move to next game after 1 second
-    setTimeout(() => {
-      if (typeof buildGame3 === 'function') {
-        buildGame3();
-      } else {
-        console.warn('buildGame3 not defined yet.');
+  // Shuffle tiles
+  function shuffle() {
+    for (let i = 0; i < 1000; i++) {
+      const movable = tiles.filter(t => isAdjacent(t, emptyPos));
+      const t = movable[Math.floor(Math.random() * movable.length)];
+      moveTile(t);
+    }
+  }
+
+  function isAdjacent(tile, empty) {
+    return (Math.abs(tile.x - empty.x) + Math.abs(tile.y - empty.y)) === 1;
+  }
+
+  function moveTile(tile) {
+    const tmp = { x: tile.x, y: tile.y };
+    tile.x = emptyPos.x;
+    tile.y = emptyPos.y;
+    tile.el.style.left = `${tile.x * tileSize}px`;
+    tile.el.style.top = `${tile.y * tileSize}px`;
+    emptyPos = tmp;
+  }
+
+  tiles.forEach(tile => {
+    tile.el.addEventListener('click', () => {
+      if (isAdjacent(tile, emptyPos)) {
+        moveTile(tile);
+        if (checkWin()) {
+          const secs = stopTimer(2);
+          const pts = pointsFor(2, secs);
+          showWin(2, secs, pts);
+          setTimeout(buildGame3, 800);
+        }
       }
-    }, 1000);
+    });
   });
+
+  function checkWin() {
+    return tiles.every(t => t.x === t.el.dataset.correctX && t.y === t.el.dataset.correctY);
+  }
+
+  // store correct positions for win check
+  tiles.forEach(t => {
+    t.el.dataset.correctX = t.x;
+    t.el.dataset.correctY = t.y;
+  });
+
+  startTimer(2);
+  shuffle();
 }
+
 
 /* ---------- Game 3: Word Scramble (scramble individual words from 1 Corinthians 13) ---------- */
 function buildGame3(){
@@ -988,6 +1028,7 @@ window.showWin = showWin;
 </script>
 </body>
 </html>
+
 
 
 
