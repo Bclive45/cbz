@@ -1015,50 +1015,62 @@ function buildGame11(){
 }
 
 /* ---------- Game 12: Favorite Dishes Quiz (>=5 questions) then final song ---------- */
-function buildGame12(){
-const qs = [
-{ q:"Which Chinese dish is Clive’s comfort food?", opts:['Chilly Beef','Chicken 65','Ramen'], a:'Chilly Beef' },
-{ q:"Which Filipino dish does Clive and Eden prefer on holidays or alone days?", opts:['Adobo Chicken','Pancit','Sisig'], a:'Sisig' },
-{ q:"Which meal do they cook together most?", opts:['Pasta','Tacos','Curry'], a:'Pasta' },
-{ q:"Which cuisine is their top pick for date night?", opts:['Italian','Japanese','Fried Chicken'], a:'Fried Chicken' },
-{ q:"Which snack do they share while watching movies?", opts:['Popcorn','Fries','Chips'], a:'Chips' }
-];
+function buildGame12() {
+  const qs = [
+    {q:"Which Chinese dish is Clive’s comfort food?", opts:['Chilly Beef','Chicken 65','Ramen'], a:'Chilly Beef'},
+    {q:"Which Filipino dish does Clive and Eden prefer on holidays or alone days?", opts:['Adobo Chicken','Pancit','Sisig'], a:'Sisig'},
+    {q:"Which meal do they cook together most?", opts:['Pasta','Tacos','Curry'], a:'Pasta'},
+    {q:"Which cuisine is their top pick for date night?", opts:['Italian','Japanese','Fried Chicken'], a:'Fried Chicken'},
+    {q:"Which snack do they share while watching movies?", opts:['Popcorn','Fries','Chips'], a:'Chips'}
+  ];
 
-const box = document.createElement('div');
-box.innerHTML = <h2>12) Favorite Dishes Quiz</h2> <div id="dishArea" style="text-align:left;max-width:760px;margin:0 auto"></div> <div style="margin-top:12px"> <button class="btn primary" id="dishSubmit">Submit Answers</button> </div> <div class="note" id="dishNote"></div> ;
-stage.appendChild(box);
+  const box = document.createElement('div');
+  box.innerHTML = `
+    <h2>12) Favorite Dishes Quiz</h2>
+    <div id="dishArea" style="text-align:left;max-width:760px;margin:0 auto"></div>
+    <div style="margin-top:12px">
+      <button class="btn primary" id="dishSubmit">Submit Answers</button>
+    </div>
+    <div class="note" id="dishNote"></div>
+  `;
+  stage.appendChild(box);
 
-const area = document.getElementById('dishArea');
-qs.forEach((it, ii) => {
-const row = document.createElement('div');
-row.style.marginBottom = '10px';
-row.innerHTML = <div style="font-weight:700">${ii+1}. ${it.q}</div>;
-it.opts.forEach(opt => {
-row.innerHTML += <label style="display:block"><input type="radio" name="dish${ii}" value="${opt}"> ${opt}</label>;
-});
-area.appendChild(row);
-});
+  const area = document.getElementById('dishArea');
+  qs.forEach((it,ii)=>{
+    const row = document.createElement('div'); 
+    row.style.marginBottom='10px';
+    row.innerHTML = `<div style="font-weight:700">${ii+1}. ${it.q}</div>`;
+    it.opts.forEach(opt=>{
+      row.innerHTML += `<label style="display:block"><input type="radio" name="dish${ii}" value="${opt}"> ${opt}</label>`;
+    });
+    area.appendChild(row);
+  });
 
-startTimer(12);
+  startTimer(12);
 
-document.getElementById('dishSubmit').addEventListener('click', () => {
-let correct = 0;
-qs.forEach((it, idx) => {
-const sel = document.querySelector(input[name="dish${idx}"]:checked);
-if (sel && sel.value === it.a) correct++;
-});
+  document.getElementById('dishSubmit').addEventListener('click', ()=>{
+    let correct = 0;
+    qs.forEach((it,idx)=>{
+      const sel = document.querySelector(`input[name="dish${idx}"]:checked`);
+      if(sel && sel.value === it.a) correct++;
+    });
 
-text
-if (correct === qs.length) {
-  const secs = stopTimer(12);
-  const pts = pointsFor(12, secs);
-  showWin(12, secs, pts);
-} else {
-  document.getElementById('dishNote').innerHTML =
-    `<span style="color:${'var(--bad)'}">You got ${correct}/${qs.length} right. Try again!</span>`;
+    if(correct === 0){
+      document.getElementById('dishNote').innerHTML =
+        `<span style="color:var(--bad)">No answers correct. Try again!</span>`;
+      return;
+    }
+
+    const secs = stopTimer(12);
+    let timePoints = pointsFor(12, secs);  
+    let accuracyRatio = correct / qs.length; 
+    let pts = Math.round(timePoints * accuracyRatio);
+
+    // Use showWin to trigger final modal, banner, and audio
+    showWin(12, secs, pts);
+  });
 }
-});
-}
+
 
 /* ---------- Final Results & Chart ---------- */
 function displayResults(){
@@ -1180,6 +1192,7 @@ window.addEventListener("load", () => {
 </script>
 </body>
 </html>
+
 
 
 
