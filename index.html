@@ -1,198 +1,909 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Happy Anniversary — Game Card</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Clive & Eden — Anniversary Journey</title>
 <style>
-body { font-family: 'Segoe UI', sans-serif; background: #fdf6f0; margin:0; padding:0; text-align:center; }
-h1 { margin-top: 20px; }
-.sub { font-size: 1.2rem; margin-bottom: 30px; }
-button { padding: 10px 20px; margin: 10px; cursor:pointer; }
-#game-container { margin: 20px auto; max-width: 800px; }
-.memory-card { border-radius: 8px; }
-.maze-cell { width:30px; height:30px; display:inline-block; border:1px solid #ccc; }
-.correct { background: #4caf50; }
-.wrong { background: #f44336; }
-#lyrics { margin-top: 20px; font-size:1rem; color:#444; min-height:60px; }
-.confetti { position: fixed; width: 100%; height: 100%; top:0; left:0; pointer-events:none; }
+  /* ---------- Base & Theme ---------- */
+  :root{
+    --bg1:#ffd1dc; --bg2:#ffe8d6; --bg3:#d9c7ff;
+    --card:#ffffffd9; --muted:#6b7280; --accent:#ff4d6d; --accent2:#7c3aed;
+    --ok:#16a34a; --bad:#dc2626;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    background:
+      radial-gradient(1000px 600px at 10% 10%, #fff2f6, transparent),
+      radial-gradient(900px 500px at 90% 20%, #f1f7ff, transparent),
+      linear-gradient(135deg, var(--bg1), var(--bg2), var(--bg3));
+    color:#111; -webkit-font-smoothing:antialiased;
+  }
+
+  /* container */
+  .wrap{max-width:1100px;margin:28px auto;padding:24px;}
+  .card{
+    background:var(--card); border-radius:18px; padding:22px; box-shadow:0 12px 40px rgba(20,20,30,.08);
+    position:relative; overflow:hidden;
+  }
+  h1{margin:0;font-size:clamp(20px,4vw,36px);letter-spacing:.6px}
+  .sub{color:var(--muted);margin-top:6px;margin-bottom:14px}
+
+  /* progress */
+  .progress{height:12px;background:#f1f5f9;border-radius:999px;overflow:hidden;margin-top:12px}
+  .bar{height:100%;width:0;background:linear-gradient(90deg,var(--accent),#ff9aa2,#ffc2d1,var(--accent2));transition:width .35s}
+  .progress-note{margin-top:10px;color:var(--muted);font-size:14px}
+
+  /* layout */
+  .stage{margin-top:20px}
+  .center{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  input[type=text],input[type=number],select{padding:8px 12px;border-radius:10px;border:1px solid #e6e9ef;font-size:16px}
+  button.btn{cursor:pointer;border:0;padding:10px 14px;border-radius:12px;font-weight:700}
+  button.primary{background:linear-gradient(90deg,var(--accent),var(--accent2));color:white;box-shadow:0 8px 18px rgba(124,58,237,.12)}
+  button.ghost{background:white;border:1px solid #e6e9ef}
+
+  /* floating hearts */
+  .hearts{position:fixed;inset:0;pointer-events:none;z-index:5}
+  .heart{position:absolute;font-size:18px;opacity:.28;animation:floatUp linear infinite}
+  .heart.big{font-size:28px;opacity:.22}
+  @keyframes floatUp{0%{transform:translateY(0) translateX(0) rotate(0)}100%{transform:translateY(-120vh) translateX(20px) rotate(360deg)}}
+
+  /* puzzles */
+  .puzzle{display:none}
+  .puzzle.active{display:block}
+  .grid4{display:grid;grid-template-columns:repeat(4,80px);gap:10px;justify-content:center}
+  .cardx{width:80px;height:80px;border-radius:14px;border:1px solid #e6e9ef;background:#fff;display:flex;align-items:center;justify-content:center;font-size:30px;cursor:pointer;user-select:none;box-shadow:0 8px 16px rgba(0,0,0,.06)}
+  .cardx.revealed{background:#fff7fb;border-color:#ffc2d1}
+  .cardx.matched{background:#dcfce7;border-color:#86efac}
+
+  .slide{display:grid;grid-template-columns:repeat(3,90px);gap:8px;justify-content:center}
+  .tile{width:90px;height:90px;border-radius:12px;border:1px solid #e6e9ef;background:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:22px;cursor:pointer;box-shadow:0 8px 16px rgba(0,0,0,.06)}
+  .tile.blank{background:transparent;border:1px dashed #e6e9ef;cursor:default;box-shadow:none}
+
+  .grid-12{display:grid;grid-template-columns:repeat(12,28px);gap:4px;justify-content:center}
+  .cell{width:28px;height:28px;border-radius:4px;border:1px solid #e6e9ef;background:#fff;display:inline-block}
+
+  .note{color:var(--muted);font-size:14px;margin-top:8px}
+
+  /* overlay modal */
+  .overlay{position:fixed;inset:0;background:rgba(255,255,255,.6);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;z-index:40}
+  .overlay.show{display:flex}
+  .modal{background:white;padding:20px;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.12);max-width:720px;width:92%}
+  .actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
+
+  /* final results */
+  #results{display:flex;gap:20px;align-items:flex-start;justify-content:center;flex-wrap:wrap;margin-top:14px}
+  #results .panel{background:#fff;padding:14px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.06);min-width:260px}
+
+  @media (max-width:640px){
+    .grid4{grid-template-columns:repeat(2,1fr)}
+    .slide{grid-template-columns:repeat(3,70px)}
+  }
 </style>
 </head>
 <body>
-<h1>Happy Anniversary 💖</h1>
-<div class="sub">John & Eden</div>
-<div id="game-container"></div>
-<div id="lyrics"></div>
-<audio id="song1" src="call123.mp3" controls></audio>
-<audio id="song2" src="345.mp3" controls></audio>
-<canvas id="confetti-canvas" class="confetti"></canvas>
+  <div class="hearts" id="hearts"></div>
+
+  <div class="wrap">
+    <div class="card">
+      <header>
+        <h1>Happy Anniversary — Clive & Eden 💖</h1>
+        <div class="sub">A journey of love, puzzles and surprises. Play through the stages to unlock songs and blessings.</div>
+        <div class="progress" aria-hidden="true"><div class="bar" id="bar"></div></div>
+        <div class="progress-note" id="progressNote">0 / 12 solved</div>
+      </header>
+
+      <main class="stage" id="stage">
+        <!-- Game sections get injected here -->
+      </main>
+
+      <div class="note">Progress saves only per page session. Reload resets the journey.</div>
+    </div>
+  </div>
+
+  <!-- hidden audios -->
+  <audio id="audio5" src="call123.mp3" preload="auto" style="display:none"></audio>
+  <audio id="audio12" src="345.mp3" preload="auto" style="display:none"></audio>
+
+  <!-- overlay modal -->
+  <div class="overlay" id="overlay">
+    <div class="modal" id="modal">
+      <h3 id="modalTitle">Well done!</h3>
+      <div id="modalBody"></div>
+      <div class="note" id="modalTime"></div>
+      <div class="actions">
+        <button class="btn ghost" id="modalClose">OK, Next</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- final banner -->
+  <div style="position:fixed;left:0;right:0;bottom:-120px;background:linear-gradient(90deg,#16a34a,#34d399);color:white;padding:14px;font-weight:700;text-align:center;border-radius:8px 8px 0 0;transition:bottom .45s;z-index:50" id="finalBanner">
+    🎉 You’ve completed all the problems — now enjoy the finale song!
+  </div>
+  <img id="revealImage" src="reveal.jpg" alt="Reveal" style="display:none; max-width:100%; margin:20px auto; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.3);">
+
 <script>
-const gameContainer = document.getElementById('game-container');
-const lyricsDiv = document.getElementById('lyrics');
-let currentGame = 1;
-let scores = [];
+/* =========================
+   Initialization & Helpers
+   ========================= */
+const TOTAL = 12;
+let solved = 0;
+let currentIndex = 1;
+const bar = document.getElementById('bar');
+const progressNote = document.getElementById('progressNote');
+const stage = document.getElementById('stage');
+const overlay = document.getElementById('overlay');
+const modalTitle = document.getElementById('modalTitle');
+const modalBody = document.getElementById('modalBody');
+const modalTime = document.getElementById('modalTime');
+const modalClose = document.getElementById('modalClose');
+const finalBanner = document.getElementById('finalBanner');
 
-function clearGameContainer() { gameContainer.innerHTML = ''; lyricsDiv.innerHTML=''; }
-function nextGame() { currentGame++; runGame(); }
+const audio5 = document.getElementById('audio5'); // plays after game5
+const audio12 = document.getElementById('audio12'); // plays at the end
 
-// Utility shuffle
-function shuffleArray(array){for(let i=array.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[array[i],array[j]]=[array[j],array[i]];}}
+// encouragement verses
+const VERSES = [
+  '“A gentle answer turns away wrath.” — Proverbs 15:1',
+  '“Two are better than one… they have a good return for their labor.” — Ecclesiastes 4:9',
+  '“Love is patient, love is kind.” — 1 Corinthians 13:4',
+  '“Be devoted to one another in love.” — Romans 12:10',
+  '“Husbands, love your wives, as Christ loved the church.” — Ephesians 5:25',
+  '“Trust in the Lord with all your heart.” — Proverbs 3:5',
+  '“Be completely humble and gentle; be patient, bearing with one another in love.” — Ephesians 4:2',
+  '“Love never fails.” — 1 Corinthians 13:8',
+  '“Encourage one another and build each other up.” — 1 Thessalonians 5:11',
+  '“A wife of noble character is her husband’s crown.” — Proverbs 12:4',
+  '“Set me as a seal upon your heart.” — Song of Solomon 8:6',
+  '“Let all that you do be done in love.” — 1 Corinthians 16:14'
+];
 
-// Start timer for scoring
-let startTime;
-function startTimer(){startTime=Date.now();}
-function endTimer(){return (Date.now()-startTime)/1000;}
+// categories and mapping
+const CATEGORIES = {
+  'Logic / Puzzles': [1,6,8],
+  'Memory / Observation': [2,4,7],
+  'Word / Trivia': [3,5,10,12],
+  'Sequence / Numerical': [9,11],
+  'Creativity / Fun': [8,12]
+};
+const catScores = {'Logic / Puzzles':0,'Memory / Observation':0,'Word / Trivia':0,'Sequence / Numerical':0,'Creativity / Fun':0};
 
-function runGame(){
-switch(currentGame){
-  case 1: startTimer(); game1(); break;
-  case 2: startTimer(); game2(); break;
-  case 3: startTimer(); game3(); break;
-  case 4: startTimer(); startMemoryGame(); break;
-  case 5: startTimer(); game5(); break;
-  case 6: startTimer(); game6(); break;
-  case 7: startTimer(); game7(); break;
-  case 8: startTimer(); game8(); break;
-  case 9: startTimer(); game9(); break;
-  case 10: startTimer(); game10(); break;
-  case 11: startTimer(); game11(); break;
-  case 12: startTimer(); game12(); break;
-  default: gameComplete();
-}}
+// scoring: per-game store
+const gameResult = {}; // game -> {secs, points}
 
-// GAME 1
-function game1(){
-  clearGameContainer();
-  const title = document.createElement('h2'); title.innerText='Game 1: Solve the number'; gameContainer.appendChild(title);
-  const question = document.createElement('p'); question.innerText='12 × 3 – 6 = ?'; gameContainer.appendChild(question);
-  const input=document.createElement('input'); input.type='number'; gameContainer.appendChild(input);
-  const btn=document.createElement('button'); btn.innerText='Submit'; gameContainer.appendChild(btn);
-  btn.onclick=()=>{
-    if(parseInt(input.value)===30){
-      scores.push({game:1,score:Math.max(10,20-endTimer())});
-      alert('Correct! Love wins.'); nextGame();
-    }else{alert('Try again.');}
-  };
+// simple point function: 5 -> best, 1 -> slow
+function pointsFor(game, secs){
+  // longer puzzles: 5, 20, 40, 75 thresholds
+  const longer = new Set([5,6,8,12]);
+  const th = longer.has(game) ? [15,30,60,120] : [5,12,25,60];
+  if(secs <= th[0]) return 5;
+  if(secs <= th[1]) return 4;
+  if(secs <= th[2]) return 3;
+  if(secs <= th[3]) return 2;
+  return 1;
 }
 
-// GAME 2 Sliding puzzle placeholder
-function game2(){
- clearGameContainer();
- const title = document.createElement('h2'); title.innerText='Game 2: Arrange the photo'; gameContainer.appendChild(title);
- const img = document.createElement('img'); img.src='wedding1.jpg'; img.width=300; gameContainer.appendChild(img);
- const btn = document.createElement('button'); btn.innerText='Next'; btn.onclick=()=>{scores.push({game:2,score:15}); nextGame();}; gameContainer.appendChild(btn);
+function updateProgress(){
+  const pct = Math.round((solved/TOTAL)*100);
+  bar.style.width = pct + '%';
+  progressNote.textContent = `${solved} / ${TOTAL} solved`;
 }
 
-// GAME 3 Word Scramble
-function game3(){
- clearGameContainer();
- const title = document.createElement('h2'); title.innerText='Game 3: Unscramble'; gameContainer.appendChild(title);
- const phrases=["love is patient","love is kind and love delights in the truth"];
- let index=0;
- function nextPhrase(){
-   if(index>=phrases.length){ scores.push({game:3,score:20}); nextGame(); return;}
-   const p=phrases[index];
-   const words=p.split(' ');
-   let scrambled = words.slice().sort(()=>Math.random()-0.5).join(' ');
-   gameContainer.innerHTML='<p>'+scrambled+'</p>';
-   const input = document.createElement('input'); input.type='text'; gameContainer.appendChild(input);
-   const btn = document.createElement('button'); btn.innerText='Submit'; gameContainer.appendChild(btn);
-   btn.onclick=()=>{if(input.value.toLowerCase()===p.toLowerCase()){index++; nextPhrase();}else{alert('Try again.');}};
- }
- nextPhrase();
+/* floating hearts (decor) */
+(function createHearts(){
+  const wrap = document.getElementById('hearts');
+  const colors = ['#ff7aa2','#ff9aa2','#ffc2d1','#e0aaff','#cba6f7','#94a3b8'];
+  for(let i=0;i<18;i++){
+    const s = document.createElement('div');
+    s.className='heart' + (Math.random()>0.7? ' big':'');
+    s.textContent = '♥';
+    s.style.left = (Math.random()*100) + 'vw';
+    s.style.bottom = (-10 + Math.random()*30) + 'vh';
+    s.style.animationDuration = (6 + Math.random()*10) + 's';
+    s.style.color = colors[(Math.random()*colors.length)|0];
+    wrap.appendChild(s);
+  }
+})();
+
+/* modal handling */
+modalClose.addEventListener('click', ()=>{
+  overlay.classList.remove('show');
+  // after modal closed, continue flow
+  if(nextAfterModal) {
+    const next = nextAfterModal;
+    nextAfterModal = null;
+    if(next === 'post-song5'){ startGame(6); } // game 6 after song5 handled separately
+    else if(next === 'final'){ playAudio12(); }
+    else startGame(next);
+  }
+});
+
+/* helper to show encouragement + timing */
+let nextAfterModal = null;
+function showWin(game, secs, pts){
+  solved = Math.max(solved, game);
+  updateProgress();
+  // tally category
+  for(const cat in CATEGORIES){
+    if(CATEGORIES[cat].includes(game)) catScores[cat] += pts;
+  }
+  gameResult[game] = {secs, pts};
+  modalTitle.textContent = `Well done — Stage ${game} cleared!`;
+  modalBody.innerHTML = `<div style="font-weight:700;margin-bottom:8px">${VERSES[game-1]}</div>`;
+  modalTime.textContent = `Time: ${secs}s • Score: ${pts}/5`;
+  overlay.classList.add('show');
+  // default next behavior:
+  if(game === 5){ // after 5 we play song, then go to game6
+    nextAfterModal = 'post-song5';
+    // start playing song and show lyrics; continue will be triggered after song ends
+    playAudio5();
+  } else if(game === 12){
+    // final: show banner and play final song; after song, show results
+    finalBanner.style.bottom = '0px';
+    nextAfterModal = 'final';
+    playAudio12();
+    document.getElementById("revealImage").style.display = "block";
+  } else {
+    nextAfterModal = game + 1;
+  }
 }
 
-// GAME 4 Memory 8 cards
-function startMemoryGame(){
-  clearGameContainer();
-  const title = document.createElement('h2'); title.innerText='Game 4: Memory Match (8 cards)'; gameContainer.appendChild(title);
-  const cardValues = ["🍎","🍎","🍌","🍌","🍇","🍇","🍒","🍒"];
-  shuffleArray(cardValues);
-  const grid = document.createElement('div'); grid.style.display='grid'; grid.style.gridTemplateColumns='repeat(4,80px)'; grid.style.gap='10px'; gameContainer.appendChild(grid);
-  let firstCard=null,lock=false,matches=0;
-  cardValues.forEach(val=>{
-    const card=document.createElement('div'); card.className='memory-card'; card.dataset.value=val;
-    card.style.width='80px'; card.style.height='80px'; card.style.display='flex'; card.style.alignItems='center'; card.style.justifyContent='center'; card.style.fontSize='2rem'; card.style.background='#444'; card.style.color='transparent'; card.style.cursor='pointer'; card.innerText=val;
-    card.onclick=()=>{
-      if(lock||card.classList.contains('matched')) return;
-      card.style.color='#fff';
-      if(!firstCard){firstCard=card;}else{
-        if(firstCard.dataset.value===card.dataset.value && firstCard!==card){
-          firstCard.classList.add('matched'); card.classList.add('matched'); matches++; firstCard=null;
-          if(matches===4){scores.push({game:4,score:25}); setTimeout(()=>{alert('Great! All pairs matched.'); nextGame();},500);}
-        }else{lock=true; setTimeout(()=>{firstCard.style.color='transparent'; card.style.color='transparent'; firstCard=null; lock=false;},1000);}
-      }
-    };
-    grid.appendChild(card);
+/* start timer helper */
+const timers = {};
+function startTimer(game){ timers[game] = performance.now(); }
+function stopTimer(game){
+  const ms = Math.max(0, performance.now() - (timers[game] || performance.now()));
+  const secs = Math.round(ms/1000);
+  return secs;
+}
+
+/* =========================
+   GAME BUILDERS
+   ========================= */
+
+/* Clear stage then show content */
+function clearStage(){
+  stage.innerHTML = '';
+}
+
+/* Start game n */
+function startGame(n){
+  clearStage();
+  window.scrollTo({top:0,behavior:'smooth'});
+  switch(n){
+    case 1: buildGame1(); break;
+    case 2: buildGame2(); break;
+    case 3: buildGame3(); break;
+    case 4: buildGame4(); break;
+    case 5: buildGame5(); break;
+    case 6: buildGame6(); break;
+    case 7: buildGame7(); break;
+    case 8: buildGame8(); break;
+    case 9: buildGame9(); break;
+    case 10: buildGame10(); break;
+    case 11: buildGame11(); break;
+    case 12: buildGame12(); break;
+    default: displayResults();
+  }
+}
+
+/* ---------- Game 1: Numerical Logic (fast) ---------- */
+function buildGame1(){
+  const box = document.createElement('div');
+  box.innerHTML = `<h2>1) Logic Math — Quick Solve</h2>
+    <p>Solve: 12 × 3 − 6 = ?</p>`;
+  const input = document.createElement('input'); input.type='number'; input.placeholder='Your answer';
+  const btn = document.createElement('button'); btn.className='btn primary'; btn.textContent='Check';
+  const msg = document.createElement('div'); msg.className='note';
+  box.appendChild(input); box.appendChild(btn); box.appendChild(msg);
+  stage.appendChild(box);
+  startTimer(1);
+  btn.addEventListener('click', ()=>{
+    const v = Number(input.value);
+    if(v === 30){
+      const secs = stopTimer(1);
+      const pts = pointsFor(1,secs);
+      showWin(1,secs,pts);
+    } else {
+      msg.innerHTML = `<span style="color:${'var(--bad)'}">Wrong — try again.</span>`;
+    }
   });
 }
 
-// GAME 5 Trivia -> triggers song1
-function game5(){
- clearGameContainer();
- const title = document.createElement('h2'); title.innerText='Game 5: Trivia about us'; gameContainer.appendChild(title);
- const q1 = document.createElement('p'); q1.innerText='Where did we first meet?'; gameContainer.appendChild(q1);
- ['School','Church','Nandos'].forEach((opt,i)=>{
-   const btn=document.createElement('button'); btn.innerText=opt; gameContainer.appendChild(btn);
-   btn.onclick=()=>{
-     if(opt==='Nandos'){alert('Correct!'); scores.push({game:5,score:30}); playSong1();}else{alert('Try again.');}
-   };
- });
- const q2 = document.createElement('p'); q2.innerText='What’s our song?'; gameContainer.appendChild(q2);
- ['Amazing Grace','Perfect','The Marriage Prayer'].forEach(opt=>{
-   const btn=document.createElement('button'); btn.innerText=opt; gameContainer.appendChild(btn);
-   btn.onclick=()=>{
-     if(opt==='The Marriage Prayer'){alert('Correct!'); scores.push({game:5,score:30}); playSong1();}else{alert('Try again.');}
-   };
- });
-}
-function playSong1(){
- const song=document.getElementById('song1'); song.play();
- const lyrics1=[
-{"text":"[Intro]Another year has passed us by\nBeneath this endless, starry sky\nAnd holding you, I realize\nwe are growing together until we die"},
-{"text":"[Verse 1]I still recall the day we met\nA memory I won't forget\nThe perfect scene, in city center\nYou are the best thing I've found yet"},
-{"text":"[Chorus]Oh, Cuppy, you're my smiling star\nNo matter if you're near or far\nYour prays heal my pains & scars\nYou're perfect just not the way you are(ooh-ooh-ooh)"}
-];
- let idx=0;
- song.ontimeupdate=()=>{
-   if(idx<lyrics1.length) lyricsDiv.innerText=lyrics1[idx].text;
- };
- song.onended=()=>{lyricsDiv.innerText=''; nextGame();};
+/* ---------- Game 2: Sliding puzzle / photo match (we use simple reveal click to keep it fast) ---------- */
+function buildGame2(){
+  const box = document.createElement('div');
+  box.innerHTML = `<h2>2) Photo Match — Oh My!!!</h2>
+    <p>Confirm the wedding photo matches the memory. Tap Reveal then confirm.</p>`;
+  const img = document.createElement('img'); img.src='wedding1.jpg'; img.alt='wedding'; img.style.maxWidth='260px'; img.style.borderRadius='12px'; img.style.boxShadow='0 10px 30px rgba(0,0,0,.08)';
+  const reveal = document.createElement('button'); reveal.className='btn primary'; reveal.textContent='Reveal / Confirm';
+  const msg = document.createElement('div'); msg.className='note';
+  box.appendChild(img); box.appendChild(document.createElement('br')); box.appendChild(reveal); box.appendChild(msg);
+  stage.appendChild(box);
+  startTimer(2);
+  reveal.addEventListener('click', ()=>{
+    // assume correct for this flow (or you can add manual verification)
+    const secs = stopTimer(2);
+    const pts = pointsFor(2,secs);
+    showWin(2,secs,pts);
+  });
 }
 
-// Placeholder for games 6-12
-function game6(){alert('Game 6 placeholder: Maze 12x12'); scores.push({game:6,score:20}); nextGame();}
-function game7(){alert('Game 7 placeholder: 7 differences'); scores.push({game:7,score:25}); nextGame();}
-function game8(){alert('Game 8 placeholder: 5-8 emoji puzzles'); scores.push({game:8,score:30}); nextGame();}
-function game9(){alert('Game 9 placeholder: Sequence builder'); scores.push({game:9,score:20}); nextGame();}
-function game10(){alert('Game 10 placeholder: 5 T/F questions'); scores.push({game:10,score:20}); nextGame();}
-function game11(){alert('Game 11 placeholder: Picture reveal'); scores.push({game:11,score:25}); nextGame();}
-function game12(){
-  alert('Game 12 placeholder: Favorite dishes quiz'); scores.push({game:12,score:30});
-  playSong2();
-}
-function playSong2(){
- const song=document.getElementById('song2'); song.play();
- const lyrics2=[
-{"text":"[Verse 1]Eight years have passed, it feels surreal,\nWe’re still a team, that’s quite the deal.\nIt’s like we blinked, and here we are,\nStill bickering like rockstars."},
-{"text":"[Chorus]Oh Cuppy, you drive me mad,\nBest worst teammate I ever had.\nYou steal my fries, you hog the bed,\nBut I still love the life we’ve led."}
-];
- let idx=0;
- song.ontimeupdate=()=>{
-   if(idx<lyrics2.length) lyricsDiv.innerText=lyrics2[idx].text;
- };
- song.onended=()=>{lyricsDiv.innerText=''; confetti(); gameComplete();};
+/* ---------- Game 3: Word Scramble (scramble individual words from 1 Corinthians 13) ---------- */
+function buildGame3(){
+  const phrases = [
+    "love is patient",
+    "love is kind",
+    "love never fails"
+  ];
+  let idx = 0;
+  const box = document.createElement('div');
+  box.innerHTML = `<h2>3) Word Scramble — 1 Corinthians 13</h2>
+    <p>Unscramble each word (words scrambled individually). Type the full phrase exactly.</p>`;
+  const phraseEl = document.createElement('div'); phraseEl.style.fontWeight='700'; phraseEl.style.marginBottom='8px';
+  const input = document.createElement('input'); input.type='text'; input.placeholder='Type phrase here...';
+  const btn = document.createElement('button'); btn.className='btn primary'; btn.textContent='Check';
+  const note = document.createElement('div'); note.className='note';
+  box.appendChild(phraseEl); box.appendChild(input); box.appendChild(btn); box.appendChild(note);
+  stage.appendChild(box);
+
+  function scrambleWord(w){
+    if(w.length <= 2) return w; // too short to scramble
+    const a = w.split('');
+    // simple scramble: swap adjacent letters but keep first/last sometimes
+    for(let i=0;i<Math.max(1,Math.floor(a.length/2));i++){
+      const i1 = Math.floor(Math.random()*(a.length));
+      const i2 = Math.floor(Math.random()*(a.length));
+      [a[i1],a[i2]]=[a[i2],a[i1]];
+    }
+    return a.join('');
+  }
+  function makeScrambled(phrase){
+    return phrase.split(' ').map(w => scrambleWord(w)).join(' ');
+  }
+  // show first scrambled
+  phraseEl.textContent = makeScrambled(phrases[idx]);
+  startTimer(3);
+  btn.addEventListener('click', ()=>{
+    const val = (input.value||'').trim().toLowerCase();
+    if(val === phrases[idx]){
+      idx++;
+      if(idx >= phrases.length){
+        const secs = stopTimer(3);
+        const pts = pointsFor(3,secs);
+        showWin(3,secs,pts);
+      } else {
+        // next phrase
+        input.value='';
+        phraseEl.textContent = makeScrambled(phrases[idx]);
+        note.textContent = 'Correct! Next phrase...';
+      }
+    } else {
+      note.innerHTML = `<span style="color:${'var(--bad)'}">Not quite—check letter order of each word.</span>`;
+    }
+  });
 }
 
-// Confetti
-function confetti(){alert('🎉 Confetti! 🎉');}
-function gameComplete(){
- clearGameContainer();
- const title=document.createElement('h2'); title.innerText='Congratulations! You completed all games.'; gameContainer.appendChild(title);
- const scoreDiv=document.createElement('div'); scoreDiv.innerHTML='<h3>Your Scores:</h3>'+scores.map(s=>'Game '+s.game+': '+s.score).join('<br>'); gameContainer.appendChild(scoreDiv);
+/* ---------- Game 4: Memory (8 cards, 4 pairs) ---------- */
+function buildGame4(){
+  const symbols = ['💖','💍','🌹','🎂','💖','💍','🌹','🎂']; // 4 pairs
+  shuffleArray(symbols);
+  const box = document.createElement('div');
+  box.innerHTML = `<h2>4) Memory Match — Find all pairs</h2><div class="grid4" id="memGrid"></div><div class="note" id="memNote"></div>`;
+  stage.appendChild(box);
+  const grid = document.getElementById('memGrid');
+  const memNote = document.getElementById('memNote');
+  let open = [], matched = 0, lock=false;
+  startTimer(4);
+  symbols.forEach((sym,i)=>{
+    const b = document.createElement('button');
+    b.className='cardx';
+    b.dataset.i = i;
+    b.textContent = '?';
+    b.addEventListener('click', ()=>{
+      if(lock || b.classList.contains('matched') || b.classList.contains('revealed')) return;
+      b.classList.add('revealed');
+      b.textContent = sym;
+      open.push({el:b,sym});
+      if(open.length === 2){
+        const [a,bx] = open;
+        if(a.sym === bx.sym){
+          a.el.classList.add('matched'); bx.el.classList.add('matched');
+          matched += 2;
+          open = [];
+          if(matched === symbols.length){
+            const secs = stopTimer(4);
+            const pts = pointsFor(4,secs);
+            memNote.innerHTML = `<span style="color:var(--ok);">All matched!</span>`;
+            setTimeout(()=> showWin(4,secs,pts), 700);
+          }
+        } else {
+          lock = true;
+          setTimeout(()=>{
+            a.el.classList.remove('revealed'); a.el.textContent='?';
+            bx.el.classList.remove('revealed'); bx.el.textContent='?';
+            open = []; lock = false;
+          }, 800);
+        }
+      }
+    });
+    grid.appendChild(b);
+  });
 }
 
-runGame();
+/* ---------- Game 5: Trivia (two questions). Play call123.mp3 after both correct. ---------- */
+function buildGame5(){
+  const box = document.createElement('div');
+  box.innerHTML = `<h2>5) Trivia — About Us</h2>
+   <div style="text-align:left;max-width:720px;margin:0 auto">
+    <p><strong>1)</strong> Where did we first meet?</p>
+    <label><input type="radio" name="q1" value="school"> School</label><br>
+    <label><input type="radio" name="q1" value="church"> Church</label><br>
+    <label><input type="radio" name="q1" value="nandos"> Nandos</label>
+    <p><strong>2)</strong> What’s our song?</p>
+    <label><input type="radio" name="q2" value="amazing"> Amazing Grace</label><br>
+    <label><input type="radio" name="q2" value="perfect"> Perfect</label><br>
+    <label><input type="radio" name="q2" value="marriage"> The Marriage Prayer</label>
+    <div style="margin-top:12px"><button class="btn primary" id="check5">Check Answers</button></div>
+   </div>
+  `;
+  stage.appendChild(box);
+  startTimer(5);
+
+  document.getElementById('check5').addEventListener('click', ()=>{
+    const q1 = document.querySelector('input[name="q1"]:checked');
+    const q2 = document.querySelector('input[name="q2"]:checked');
+    const note = box.querySelector('.note');
+    if(!q1 || !q2){
+      alert('Please answer both questions.');
+      return;
+    }
+    const ok1 = (q1.value === 'nandos');
+    const ok2 = (q2.value === 'marriage');
+    if(ok1 && ok2){
+      const secs = stopTimer(5);
+      const pts = pointsFor(5,secs);
+      // both correct: play song and then move to next after song ends (handled in showWin)
+      showWin(5,secs,pts);
+    } else {
+      alert('One or both answers are not correct. Try again.');
+    }
+  });
+}
+
+/* ---------- Audio & Lyrics handling (block-by-block) ---------- */
+const lyricBlockDuration = 8000; // default show each block for 5s (you can edit)
+function playAudio5(){
+  // show overlay will already be present; we want to play audio and display lyrics
+  const a = audio5;
+  displayLyricsFor(a, [
+    "[Intro] Another year has passed us by\nBeneath this endless, starry sky\nAnd holding you, I realize\nwe are growing together until we die",
+    "[Verse 1] I still recall the day we met\nA memory I won't forget\nThe perfect scene, in city center\nYou are the best thing I've found yet",
+    "[Chorus] Oh, Cuppy, you're my smiling star\nNo matter if you're near or far\nYour prays heal my pains & scars\nYou're perfect just not the way you are"
+  ]);
+  a.play().catch(()=>{}); // play, browsers will allow since user clicked earlier
+  a.onended = ()=>{
+    // when audio ends, close modal and proceed to next game (6)
+    overlay.classList.remove('show');
+    startGame(6);
+  };
+}
+function playAudio12(){
+  const a = audio12;
+  displayLyricsFor(a, [
+    "[Verse 1] Eight years have passed, it feels surreal,\nWe’re still a team, that’s quite the deal.\nIt’s like we blinked, and here we are,\nStill bickering like rockstars.",
+    "[Chorus] Oh Cuppy, you drive me mad,\nBest worst teammate I ever had.\nYou steal my fries, you hog the bed,\nBut I still love the life we’ve led.",
+    "[Final Chorus] Oh Cuppy, you drive me mad,\nBest worst teammate I ever had...\nEight years strong, and still it’s true—I’d be empty without you."
+  ]);
+  a.play().catch(()=>{});
+  a.onended = ()=>{
+    // show final results when audio ends
+    overlay.classList.remove('show');
+    displayResults();
+  };
+}
+function displayLyricsFor(audioEl, blocks){
+  const lyricsDiv = document.getElementById('lyrics');
+  let i = 0;
+  lyricsDiv.innerText = blocks[0] || '';
+  const id = setInterval(()=>{
+    i++;
+    if(i < blocks.length) lyricsDiv.innerText = blocks[i];
+    else { lyricsDiv.innerText = ''; clearInterval(id); }
+  }, lyricBlockDuration);
+}
+
+/* ---------- Game 6: Maze 12x12 (click cells to create path along predefined path) ---------- */
+function buildGame6(){
+  const size = 12;
+  // create a simple path from (0,0) to (size-1,size-1)
+  const path = []; // we'll generate a simple diagonal-ish path with some rights/downs
+  let r=0,c=0;
+  path.push(`${r},${c}`);
+  while(r < size-1 || c < size-1){
+    if(Math.random() < 0.5 && c < size-1) c++; else if(r < size-1) r++;
+    path.push(`${r},${c}`);
+  }
+  const blockedCount = Math.floor(size*size*0.18);
+  const blocked = new Set();
+  while(blocked.size < blockedCount){
+    const br = Math.floor(Math.random()*size);
+    const bc = Math.floor(Math.random()*size);
+    const key = `${br},${bc}`;
+    if(!path.includes(key) && key !== `0,0` && key !== `${size-1},${size-1}`) blocked.add(key);
+  }
+
+  const box = document.createElement('div');
+  box.innerHTML = `<h2>6) Maze — Navigate from S to E</h2><p>Click cells to create the correct path from S → E. If you click wrong cell path resets.</p>`;
+  const grid = document.createElement('div'); grid.className='grid-12'; grid.style.margin='12px auto';
+  box.appendChild(grid);
+  const note = document.createElement('div'); note.className='note'; box.appendChild(note);
+  stage.appendChild(box);
+  startTimer(6);
+
+  // draw grid
+  for(let rr=0; rr < size; rr++){
+    for(let cc=0; cc < size; cc++){
+      const key = `${rr},${cc}`;
+      const el = document.createElement('div'); el.className='cell'; el.dataset.rc=key;
+      if(key === '0,0'){ el.style.background='#e6f7ff'; el.title='Start'; el.innerText='S'; }
+      if(key === `${size-1},${size-1}`){ el.style.background='#dcfce7'; el.title='End'; el.innerText='E'; }
+      if(blocked.has(key)){ el.style.background='#f3f4f6'; el.title='Blocked'; el.innerText='×'; el.classList.add('blocked'); }
+      el.addEventListener('click', ()=>{
+        if(el.classList.contains('blocked')) return;
+        // check next expected
+        const idx = pathClicked.length;
+        if(key === path[idx]){
+          el.style.background = '#fff7ed'; el.style.borderColor='#fdba74';
+          pathClicked.push(key);
+          if(pathClicked.length === path.length){
+            const secs = stopTimer(6);
+            const pts = pointsFor(6,secs);
+            showWin(6,secs,pts);
+          }
+        } else {
+          // reset
+          note.innerHTML = `<span style="color:var(--bad)">Wrong move — path reset.</span>`;
+          setTimeout(()=>{ note.innerHTML=''; document.querySelectorAll('.cell').forEach(card=>{ if(!card.classList.contains('blocked') && !card.title) {card.style.background='#fff'; card.style.borderColor='';}}); pathClicked = []; },600);
+        }
+      });
+      grid.appendChild(el);
+    }
+  }
+  // track clicks
+  let pathClicked = [];
+}
+
+/* ---------- Game 7: Find 7 differences (we simulate by 7 hotspots over the two images) ---------- */
+function buildGame7(){
+  const box = document.createElement('div');
+  box.innerHTML = `<h2>7) Spot the Differences — 7 differences</h2>
+    <p>Click each difference you find between the two photos.</p>
+    <div style="display:flex;gap:10px;justify-content:center;align-items:flex-start;flex-wrap:wrap">
+      <div style="position:relative">
+        <img src="wedding2.jpg" alt="left" style="max-width:300px;border-radius:10px">
+        <div id="leftHotspots" style="position:absolute;inset:0;"></div>
+      </div>
+      <div style="position:relative">
+        <img src="wedding3.jpg" alt="right" style="max-width:300px;border-radius:10px">
+        <div id="rightHotspots" style="position:absolute;inset:0;"></div>
+      </div>
+    </div>
+    <div class="note" id="diffNote"></div>
+  `;
+  stage.appendChild(box);
+  startTimer(7);
+  // Randomly create 7 hotspots on left image; clicking matching areas counts
+  const hotspots = [];
+  const left = box.querySelector('#leftHotspots');
+  const right = box.querySelector('#rightHotspots');
+  const W = 300, H = 200; // approximate overlay dims; fine for placeholders
+  for(let i=0;i<7;i++){
+    const x = 20 + Math.random()*(W-40), y = 20 + Math.random()*(H-40);
+    hotspots.push({x,y,found:false});
+  }
+  hotspots.forEach((h,idx)=>{
+    const dotL = document.createElement('div'); styleHotspot(dotL,h); left.appendChild(dotL);
+    const dotR = document.createElement('div'); styleHotspot(dotR,h); right.appendChild(dotR);
+    dotL.addEventListener('click', ()=> markHot(idx, dotL, dotR));
+    dotR.addEventListener('click', ()=> markHot(idx, dotL, dotR));
+  });
+  function styleHot(el,h){
+    el.style.position='absolute'; el.style.left=(h.x/ (W) * 100)+'%'; el.style.top=(h.y/(H)*100)+'%';
+    el.style.width='18px'; el.style.height='18px'; el.style.borderRadius='50%'; el.style.transform='translate(-50%,-50%)';
+    el.style.border='2px solid rgba(255,255,255,0.9)'; el.style.boxShadow='0 6px 12px rgba(0,0,0,.12)'; el.style.cursor='pointer';
+  }
+  function markHot(i, l, r){
+    if(hotspots[i].found) return;
+    hotspots[i].found = true;
+    l.style.background = '#ffb6c1'; r.style.background = '#ffb6c1';
+    l.style.border='2px solid #fff'; r.style.border='2px solid #fff';
+    const leftCount = hotspots.filter(h=>h.found).length;
+    document.getElementById('diffNote').textContent = `${leftCount} / 7 found`;
+    if(leftCount === 7){
+      const secs = stopTimer(7);
+      const pts = pointsFor(7,secs);
+      showWin(7,secs,pts);
+    }
+  }
+}
+
+/* ---------- Game 8: Emoji puzzles (5 puzzles, some biblical) ---------- */
+function buildGame8(){
+  const puzzles = [
+    {em:"⛪👰🤵", ans:"Church Wedding"},
+    {em:"❤️⌛", ans:"Love Endures"},
+    {em:"🤲🕊️", ans:"Praying to the Holy Spirit"},
+    {em:"🕯️🙏❤️", ans:"Faith Hope Love"},
+    {em:"🌾 🍞 🍷", ans:"Holy Communion"} // biblical 
+  ];
+  let idx = 0;
+  const box = document.createElement('div');
+  box.innerHTML = `<h2>8) Emoji Puzzles</h2><p>Solve each emoji clue (type a short answer).</p>
+    <div id="emojiArea" style="font-size:28px;font-weight:700;margin:8px"></div>
+    <input id="emojiAns" type="text" placeholder="Type answer..."><button class="btn primary" id="emojiCheck">Check</button>
+    <div class="note" id="emojiNote"></div>`;
+  stage.appendChild(box);
+  startTimer(8);
+  const area = document.getElementById('emojiArea');
+  const ans = document.getElementById('emojiAns');
+  const check = document.getElementById('emojiCheck');
+  const note = document.getElementById('emojiNote');
+
+  function show(){
+    area.textContent = puzzles[idx].em;
+    ans.value = '';
+  }
+  check.addEventListener('click', ()=>{
+    const v = (ans.value||'').trim().toLowerCase();
+    if(!v){ return note.textContent='Type something.'; }
+    // simple normalization and check contains keywords
+    const ok = puzzles[idx].ans.split(' ').every(w=> v.includes(w.split('').slice(0,3).join('')) || v.includes(w));
+    if(ok){
+      idx++;
+      if(idx >= puzzles.length){
+        const secs = stopTimer(8);
+        const pts = pointsFor(8,secs);
+        showWin(8,secs,pts);
+      } else {
+        note.textContent = 'Correct — next puzzle!';
+        show();
+      }
+    } else {
+      note.textContent = 'Not right — try another phrase.';
+    }
+  });
+  show();
+}
+
+/* ---------- Game 9: Sequence puzzle ---------- */
+function buildGame9(){
+  const box = document.createElement('div');
+  box.innerHTML = `<h2>9) Sequence</h2><p>Find the missing term: 3, 9, 27, ?, 243</p>
+    <input id="seqIn" type="number" placeholder="Your answer"><button class="btn primary" id="seqCheck">Check</button>
+    <div class="note" id="seqNote"></div>`;
+  stage.appendChild(box);
+  startTimer(9);
+  document.getElementById('seqCheck').addEventListener('click', ()=>{
+    const v = Number(document.getElementById('seqIn').value);
+    if(v === 81){
+      const secs = stopTimer(9);
+      const pts = pointsFor(9,secs);
+      showWin(9,secs,pts);
+    } else {
+      document.getElementById('seqNote').innerHTML = `<span style="color:${'var(--bad)'}">Wrong — think geometric ratio ×3.</span>`;
+    }
+  });
+}
+
+/* ---------- Game 10: Five T/F questions (placeholder answers) ---------- */
+function buildGame10(){
+  const qs = [
+    {q:"We went on our honeymoon to Marriott Beach", a:true},
+    {q:"Our first trip was to Paris.", a:false},
+    {q:"We both love pasta", a:true},
+    {q:"We met in MVJ", a:false},
+    {q:"Our first prayer together was in Blessed Sacrament", a:true}
+  ];
+  const box = document.createElement('div');
+  box.innerHTML = `<h2>10) True or False — 5 quick statements</h2><div id="tfArea" style="text-align:left;max-width:720px;margin:0 auto"></div><div style="margin-top:12px"><button class="btn primary" id="tfCheck">Submit</button></div>`;
+  stage.appendChild(box);
+  const tfArea = document.getElementById('tfArea');
+  qs.forEach((it,idx)=>{
+    const row = document.createElement('div');
+    row.style.marginBottom='8px';
+    row.innerHTML = `<div>${idx+1}. ${it.q}</div>
+      <label><input type="radio" name="q${idx}" value="true"> True</label>
+      <label style="margin-left:8px"><input type="radio" name="q${idx}" value="false"> False</label>`;
+    tfArea.appendChild(row);
+  });
+  startTimer(10);
+  document.getElementById('tfCheck').addEventListener('click', ()=>{
+    let okAll = true;
+    qs.forEach((it,idx)=>{
+      const sel = document.querySelector(`input[name="q${idx}"]:checked`);
+      if(!sel || ((sel.value==='true') !== it.a)) okAll = false;
+    });
+    if(okAll){
+      const secs = stopTimer(10); const pts = pointsFor(10,secs);
+      showWin(10,secs,pts);
+    } else alert('Some answers are incorrect — try again.');
+  });
+}
+
+/* ---------- Game 11: Logic Puzzle (small riddle) ---------- */
+function buildGame11(){
+  const box = document.createElement('div');
+  box.innerHTML = `<h2>11) Riddle</h2><p>I speak without a mouth and hear without ears. I have nobody, but I come alive with wind. What am I?</p>
+   <input id="r11" type="text" placeholder="Your answer"><button class="btn primary" id="r11b">Submit</button><div class="note" id="r11n"></div>`;
+  stage.appendChild(box);
+  startTimer(11);
+  document.getElementById('r11b').addEventListener('click', ()=>{
+    const v = (document.getElementById('r11').value||'').trim().toLowerCase();
+    if(v === 'echo'){
+      const secs = stopTimer(11); const pts = pointsFor(11,secs);
+      showWin(11,secs,pts);
+    } else {
+      document.getElementById('r11n').textContent = 'Not quite — think nature of sound.';
+    }
+  });
+}
+
+/* ---------- Game 12: Favorite Dishes Quiz (>=5 questions) then final song ---------- */
+function buildGame12(){
+  const qs = [
+    {q:"Which Chinese dish is Clive’s comfort food?", opts:['Chilly Beef','Chicken 65','Ramen'], a:'Chilly Beef'},
+    {q:"Which Filipino dish does Clive and Eden prefer on holidays or alone days?", opts:['Adobo Chicken','Pancit','Sisig'], a:'Sisig'},
+    {q:"Which meal do they cook together most?", opts:['Pasta','Tacos','Curry'], a:'Pasta'},
+    {q:"Which cuisine is their top pick for date night?", opts:['Italian','Japanese','Fried Chicken'], a:'Fried Chicken'},
+    {q:"Which snack do they share while watching movies?", opts:['Popcorn','Fries','Chips'], a:'Chips'}
+  ];
+  const box = document.createElement('div');
+  box.innerHTML = `<h2>12) Favorite Dishes Quiz</h2><div id="dishArea" style="text-align:left;max-width:760px;margin:0 auto"></div><div style="margin-top:12px"><button class="btn primary" id="dishSubmit">Submit Answers</button></div><div class="note" id="dishNote"></div>`;
+  stage.appendChild(box);
+  const area = document.getElementById('dishArea');
+  qs.forEach((it,ii)=>{
+    const row = document.createElement('div'); row.style.marginBottom='10px';
+    row.innerHTML = `<div style="font-weight:700">${ii+1}. ${it.q}</div>`;
+    it.opts.forEach(opt=>{
+      const id = `dish${ii}_${opt.replace(/\s+/g,'')}`;
+      row.innerHTML += `<label style="display:block"><input type="radio" name="dish${ii}" value="${opt}"> ${opt}</label>`;
+    });
+    area.appendChild(row);
+  });
+  startTimer(12);
+  document.getElementById('dishSubmit').addEventListener('click', ()=>{
+    // evaluate
+    let correct = 0;
+    qs.forEach((it,idx)=>{
+      const sel = document.querySelector(`input[name="dish${idx}"]:checked`);
+      if(sel && sel.value === it.a) correct++;
+    });
+    if(correct === qs.length){
+      const secs = stopTimer(12); const pts = pointsFor(12,secs);
+      showWin(12,secs,pts);
+    } else {
+      document.getElementById('dishNote').innerHTML = `<span style="color:${'var(--bad)'}">You got ${correct}/${qs.length} right. Try again!</span>`;
+    }
+  });
+}
+
+/* ---------- Final Results & Chart ---------- */
+function displayResults(){
+  // hide lyrics, audio
+  document.getElementById('lyrics').innerText = '';
+  clearStage();
+  const container = document.createElement('div');
+  container.innerHTML = `<h2>Congratulations Eden — Journey Complete 🎉</h2>
+    <p class="note">Here is your final score and category breakdown.</p>
+    <div id="results"></div>`;
+  stage.appendChild(container);
+
+  // total score
+  const total = Object.values(gameResult).reduce((s, g)=> s + (g ? g.pts : 0), 0);
+  const totalPanel = document.createElement('div'); totalPanel.className='panel';
+  totalPanel.innerHTML = `<h3>Total Score</h3><div style="font-size:28px;font-weight:800">${total} pts</div>`;
+  // per-game list
+  const listPanel = document.createElement('div'); listPanel.className='panel';
+  let listHtml = '<h3>Per Game</h3>';
+  for(let g=1; g<=TOTAL; g++){
+    const gr = gameResult[g] || {secs:'—', pts:0};
+    listHtml += `<div>Game ${g}: ${gr.pts} / 5 — ${gr.secs}s</div>`;
+  }
+  listPanel.innerHTML = listHtml;
+
+  // category calculation
+  const categoryScores = {};
+  let maxPerCat = {};
+  for(const cat in CATEGORIES){
+    const games = CATEGORIES[cat];
+    categoryScores[cat] = games.reduce((sum,g)=> sum + ((gameResult[g]||{pts:0}).pts), 0);
+    maxPerCat[cat] = games.length * 5;
+  }
+
+  // chart canvas
+  const chartPanel = document.createElement('div'); chartPanel.className='panel';
+  chartPanel.innerHTML = `<h3>Category Breakdown</h3><canvas id="catChart" width="520" height="260"></canvas>`;
+
+  const resultsDiv = document.getElementById('results');
+  resultsDiv.appendChild(totalPanel);
+  resultsDiv.appendChild(listPanel);
+  resultsDiv.appendChild(chartPanel);
+
+  // draw chart
+  const ctx = document.getElementById('catChart').getContext('2d');
+  const keys = Object.keys(categoryScores);
+  const max = Math.max(...Object.values(maxPerCat));
+  ctx.clearRect(0,0,520,260);
+  keys.forEach((k,i)=>{
+    const val = categoryScores[k];
+    const pct = val / maxPerCat[k];
+    const barH = pct * 160;
+    const x = 50 + i*90;
+    ctx.fillStyle = '#ffd1e0';
+    ctx.fillRect(x,200-barH,40,barH);
+    ctx.fillStyle = '#222';
+    ctx.font = '12px Inter, sans-serif';
+    ctx.fillText(k, x-10, 220);
+    ctx.fillStyle = '#222';
+    ctx.fillText(`${val}/${maxPerCat[k]}`, x, 190-barH);
+  });
+
+  
+  // confetti
+  startConfetti();
+
+  // final banner visible
+  finalBanner.style.bottom = '0px';
+}
+
+/* =========================
+   Utilities
+   ========================= */
+function clearStage(){ stage.innerHTML = ''; }
+function shuffleArray(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } }
+
+/* confetti (simple particle burst) */
+function startConfetti(){
+  const canvas = document.getElementById('confettiCanvas');
+  if(!canvas) return;
+  canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+  const ctx = canvas.getContext('2d');
+  const particles = [];
+  for(let i=0;i<180;i++){
+    particles.push({
+      x: Math.random()*canvas.width,
+      y: Math.random()*-canvas.height,
+      vx: (Math.random()-0.5)*6,
+      vy: Math.random()*6+2,
+      r: Math.random()*6+4,
+      color: ['#ff7aa2','#ffcc99','#ffd1e0','#c7a7ff','#a6f3d8'][Math.floor(Math.random()*5)]
+    });
+  }
+  let frames = 0;
+  const anim = setInterval(()=> {
+    frames++;
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    particles.forEach(p=>{
+      p.x += p.vx; p.y += p.vy; p.vy += 0.12;
+      ctx.beginPath(); ctx.fillStyle = p.color; ctx.ellipse(p.x,p.y,p.r,p.r,0,0,Math.PI*2); ctx.fill();
+    });
+    if(frames > 220) { clearInterval(anim); ctx.clearRect(0,0,canvas.width,canvas.height); }
+  }, 16);
+}
+
+/* =========================
+   Start the journey
+   ========================= */
+updateProgress();
+startGame(1); // begins with game 1 automatically
+
+/* Expose startGame for modal navigation and tests */
+window.startGame = startGame;
+window.showWin = showWin;
 </script>
 </body>
 </html>
