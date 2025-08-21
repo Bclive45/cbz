@@ -325,9 +325,9 @@ function buildGame2() {
   `;
   stage.appendChild(box);
 
-  const SIZE = 2; // 2x2 puzzle
+  const SIZE = 3; // 3x3 puzzle
   const img = 'wedding1.jpg';
-  const tileSize = 200; // bigger tile size for visibility
+  const tileSize = 150; // tile size in px
   let emptyPos = { x: SIZE - 1, y: SIZE - 1 }; // bottom-right empty
   let tiles = [];
 
@@ -339,10 +339,10 @@ function buildGame2() {
   puzzle.style.border = '2px solid #ccc';
   box.appendChild(puzzle);
 
-  // Initialize tiles
+  // Create tiles (skip bottom-right)
   for (let y = 0; y < SIZE; y++) {
     for (let x = 0; x < SIZE; x++) {
-      if (x === SIZE - 1 && y === SIZE - 1) continue; // skip last tile (empty)
+      if (x === SIZE - 1 && y === SIZE - 1) continue; // empty spot
       const tile = document.createElement('div');
       tile.style.width = tile.style.height = `${tileSize}px`;
       tile.style.position = 'absolute';
@@ -354,18 +354,12 @@ function buildGame2() {
       tile.style.border = '1px solid #fff';
       tile.style.cursor = 'pointer';
       puzzle.appendChild(tile);
-      tiles.push({ el: tile, x, y });
+      tiles.push({ el: tile, x, y, correctX: x, correctY: y });
     }
   }
 
-  // store correct positions for win check
-  tiles.forEach(t => {
-    t.el.dataset.correctX = t.x;
-    t.el.dataset.correctY = t.y;
-  });
-
   function isAdjacent(tile, empty) {
-    return (Math.abs(tile.x - empty.x) + Math.abs(tile.y - empty.y)) === 1;
+    return Math.abs(tile.x - empty.x) + Math.abs(tile.y - empty.y) === 1;
   }
 
   function moveTile(tile) {
@@ -378,7 +372,8 @@ function buildGame2() {
   }
 
   function checkWin() {
-    return tiles.every(t => t.x == t.el.dataset.correctX && t.y == t.el.dataset.correctY);
+    const tilesCorrect = tiles.every(t => t.x === t.correctX && t.y === t.correctY);
+    return tilesCorrect && emptyPos.x === SIZE - 1 && emptyPos.y === SIZE - 1;
   }
 
   tiles.forEach(tile => {
@@ -395,8 +390,9 @@ function buildGame2() {
     });
   });
 
+  // Shuffle the tiles
   function shuffle() {
-    for (let i = 0; i < 20; i++) { // fewer moves for 2x2
+    for (let i = 0; i < 50; i++) { // more moves for better shuffle
       const movable = tiles.filter(t => isAdjacent(t, emptyPos));
       const t = movable[Math.floor(Math.random() * movable.length)];
       moveTile(t);
@@ -406,6 +402,7 @@ function buildGame2() {
   startTimer(2);
   shuffle();
 }
+
 
 
 /* ---------- Game 3: Word Scramble (scramble individual words from 1 Corinthians 13) ---------- */
@@ -1026,6 +1023,7 @@ window.showWin = showWin;
 </script>
 </body>
 </html>
+
 
 
 
