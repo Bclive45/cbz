@@ -314,13 +314,16 @@ function buildGame1(){
 }
 
 /* ---------- Game 2: Sliding puzzle / photo match (updated) ---------- */
+const stage = document.getElementById('stage'); // Make sure this exists at the top of your script
+
 function buildGame2() {
-  // Clear previous stage
-  stage.innerHTML = '';
+  stage.innerHTML = ''; // Clear previous game
 
   const box = document.createElement('div');
-  box.innerHTML = `<h2>2) Photo Match — Oh My!!!</h2>
-    <p>Confirm the wedding photo matches the memory. Tap Reveal then confirm.</p>`;
+  box.innerHTML = `
+    <h2>2) Photo Match — Oh My!!!</h2>
+    <p>Confirm the wedding photo matches the memory. Tap Reveal then confirm.</p>
+  `;
 
   const img = document.createElement('img');
   img.src = 'wedding1.jpg';
@@ -352,10 +355,18 @@ function buildGame2() {
   reveal.addEventListener('click', () => {
     const secs = stopTimer(2);
     const pts = pointsFor(2, secs);
-    showWin(2, secs, pts);
 
-    // Move to next game automatically
-    setTimeout(buildGame3, 500);
+    // Instead of showWin blocking flow, call a simple confirmation first
+    msg.textContent = `You revealed the photo! Points: ${pts}`;
+
+    // Move to next game after 1 second
+    setTimeout(() => {
+      if (typeof buildGame3 === 'function') {
+        buildGame3();
+      } else {
+        console.warn('buildGame3 not defined yet.');
+      }
+    }, 1000);
   });
 }
 
@@ -977,5 +988,6 @@ window.showWin = showWin;
 </script>
 </body>
 </html>
+
 
 
