@@ -102,7 +102,7 @@
       <div class="note">Progress saves only per page session. Reload resets the journey.</div>
     </div>
   </div>
-  <div id="lyrics" style="white-space: pre-line; text-align:center; margin-top:20px; font-size:16px; line-height:1.4; color:#333;"></div>
+  <div id="lyrics" style="white-space: pre-line; text-align:center; margin-top:20px; font-size:18px; line-height:1.6; color:#222;"></div>
   <!-- hidden audios -->
   <audio id="audio5" src="call123.mp3" preload="auto" style="display:none"></audio>
   <audio id="audio12" src="345.mp3" preload="auto" style="display:none"></audio>
@@ -275,7 +275,7 @@ function startGame(n){
   window.scrollTo({top:0,behavior:'smooth'});
   switch(n){
     case 1: buildGame1(); break;
-    case 2: startGame(3); break;
+    case 2: startGame(5); break;
     case 3: buildGame3(); break;
     case 4: buildGame4(); break;
     case 5: buildGame5(); break;
@@ -570,54 +570,63 @@ function buildGame5(){
 
 
 /* ---------- Audio & Lyrics handling (block-by-block) ---------- */
-const lyricBlockDuration = 8000; // default show each block for 5s (you can edit)
-function playAudio5(){
-  // Hide modal immediately so lyrics can be seen
-  overlay.classList.remove('show');
+const lyricsDiv = document.getElementById("lyrics");
+const lyricBlockDuration = 6000; // ms per block shown
 
-  const a = audio5;
-  const lyricsDiv = document.getElementById('lyrics');
-
-  // reset lyrics
-  lyricsDiv.innerText = '';
-
-  displayLyricsFor(a, [
-    "[Intro] Another year has passed us by\nBeneath this endless, starry sky\nAnd holding you, I realize\nwe are growing together until we die",
+// ---------- SONG after Game 5 ----------
+function playAudio5() {
+  const a = document.getElementById("audio5");
+  const blocks = [
+    "[Intro] Another year has passed us by\nBeneath this endless, starry sky\nAnd holding you, I realize\nWe are growing together until we die",
     "[Verse 1] I still recall the day we met\nA memory I won't forget\nThe perfect scene, in city center\nYou are the best thing I've found yet",
-    "[Chorus] Oh, Cuppy, you're my smiling star\nNo matter if you're near or far\nYour prays heal my pains & scars\nYou're perfect just not the way you are"
-  ]);
+    "[Chorus] Oh, Cuppy, you're my smiling star\nNo matter if you're near or far\nYour prays heal my pains & scars\nYou're perfect just not the way you are (ooh-ooh-ooh)",
+    "[Verse 2] In God we have a life and made a home\nNo matter where we choose to roam\nThrough every chapter, every poem\nWith you, I'm not alone",
+    "[Chorus] Oh, Cuppy, you're my smiling star\nNo matter if you're near or far\nYour prays heal my pains & scars\nYou're perfect just not the way you are (ooh-ooh-ooh)",
+    "[Bridge] So let's raise a glass to all our years\nTo all the smiles and all the tears\nYou chase away my doubts and fears\nMy love, for you, my heart still cheers",
+    "[Outro] Happy anniversary, my love\nA gift sent from the stars above\nMy precious, gentle, sweet white dove\nIt's you I'm always thinking of"
+  ];
 
-  a.play().catch(()=>{}); // play audio
-
-  a.onended = ()=>{
-    lyricsDiv.innerText = '';   // clear lyrics
-    startGame(6);               // move to next game only AFTER song ends
-  };
-}
-
-function playAudio12(){
-  const a = audio12;
-  displayLyricsFor(a, [
-    "[Verse 1] Eight years have passed, it feels surreal,\nWe’re still a team, that’s quite the deal.\nIt’s like we blinked, and here we are,\nStill bickering like rockstars.",
-    "[Chorus] Oh Cuppy, you drive me mad,\nBest worst teammate I ever had.\nYou steal my fries, you hog the bed,\nBut I still love the life we’ve led.",
-    "[Final Chorus] Oh Cuppy, you drive me mad,\nBest worst teammate I ever had...\nEight years strong, and still it’s true—I’d be empty without you."
-  ]);
+  displayLyrics(blocks, a, () => startGame(6)); // continue only AFTER song finishes
   a.play().catch(()=>{});
-  a.onended = ()=>{
-    // show final results when audio ends
-    overlay.classList.remove('show');
-    displayResults();
-  };
 }
-function displayLyricsFor(audioEl, blocks){
-  const lyricsDiv = document.getElementById('lyrics');
+
+// ---------- SONG after Game 12 ----------
+function playAudio12() {
+  const a = document.getElementById("audio12");
+  const blocks = [
+    "[Verse 1] Eight years have passed, it feels surreal,\nWe’re still a team, that’s quite the deal.\nIt’s like we blinked, and here we are,\nStill bickering like rockstars.",
+    "[Pre-Chorus] You nap away while I freak out,\nI do the work, you joke about.\nBut every time you flash that grin,\nI can’t help falling back again.",
+    "[Chorus] Oh Cuppy, you drive me mad,\nBest worst teammate I ever had.\nYou steal my fries, you hog the bed,\nBut I still love the life we’ve led.\nOh darling, it’s plain to see,\nYou’re the joker and a part of me.\nEight years gone, but I still choose—\nBut, feels like yesterday I met you.",
+    "[Verse 2] You say you’ll help, but then you bail,\nI carry boxes, you check the mail.\nYet when the world feels way too loud,\nYou’re the calm within the crowd.",
+    "[Pre-Chorus] You snore away, I stay awake,\nBut somehow that’s the perfect shake.\nAnd every time you roll your eyes,\nYou’re still my favorite sweet surprise.",
+    "[Chorus] Oh Cuppy, you drive me mad,\nBest worst teammate I ever had.\nYou steal my fries, you hog the bed,\nBut I still love the life we’ve led.\nOh darling, it’s plain to see,\nYou’re the joker and a part of me.\nEight years gone, but I still choose—\nBut, feels like yesterday I met you.",
+    "[Bridge] We’ve had our fights, we’ve had our quirks,\nWe’ve swapped romance for Netflix works.\nBut every laugh, each silly thing,\nIs better than a tesla car.",
+    "[Final Chorus] Oh Cuppy, you drive me mad,\nBest worst teammate I ever had.\nFrom day one, to season eight,\nYou’re the best mistake I’ll celebrate.\nOh darling, it’s plain to see,\nYou’re the quirkiest part of me.\nEight years strong, and still it’s true—\nI’d be empty without you."
+  ];
+
+  displayLyrics(blocks, a, () => displayResults()); // finish the journey
+  a.play().catch(()=>{});
+}
+
+// ---------- Generic lyric handler ----------
+function displayLyrics(blocks, audioEl, onEnd) {
   let i = 0;
   lyricsDiv.innerText = blocks[0] || '';
-  const id = setInterval(()=>{
+
+  const interval = setInterval(() => {
     i++;
-    if(i < blocks.length) lyricsDiv.innerText = blocks[i];
-    else { lyricsDiv.innerText = ''; clearInterval(id); }
+    if (i < blocks.length) {
+      lyricsDiv.innerText = blocks[i];
+    } else {
+      clearInterval(interval);
+    }
   }, lyricBlockDuration);
+
+  audioEl.onended = () => {
+    clearInterval(interval);
+    lyricsDiv.innerText = '';
+    onEnd();
+  };
 }
 
 /* ---------- Game 6: Maze 12x12 (click cells to create path along predefined path) ---------- */
@@ -1055,6 +1064,7 @@ window.showWin = showWin;
 </script>
 </body>
 </html>
+
 
 
 
