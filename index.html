@@ -136,7 +136,7 @@
       <div id="splash">
         <div class="splash-content">
           <h1>💖 Happy Anniversary Clive & Eden 💖</h1>
-          <p>Eight years of love, laughter, and memories.<br>
+          <p>Eight years of love, laughter, and memories. God Bless you Love and Hope you have a nice day.💖<br>
              Hope you enjoy your wishes 🎉</p>
         </div>
       </div>
@@ -633,8 +633,7 @@ a.currentTime = 0;
 a.play().catch(()=>{});
 }
 
-  function playAudio12() {
-const a = document.getElementById("audio12");
+ 
 const blocks = [
 "[Verse 1] Eight years have passed, it feels surreal,\nWe’re still a team, that’s quite the deal.\nIt’s like we blinked, and here we are,\nStill bickering like rockstars.",
 "[Pre-Chorus] You nap away while I freak out,\nI do the work, you joke about.\nBut every time you flash that grin,\nI can’t help falling back again.",
@@ -646,9 +645,14 @@ const blocks = [
 "[Final Chorus] Oh Cuppy, you drive me mad,\nBest worst teammate I ever had.\nFrom day one, to season eight,\nYou’re the best mistake I’ll celebrate.\nOh darling, it’s plain to see,\nYou’re the quirkiest part of me.\nEight years strong, and still it’s true—\nI’d be empty without you."
 ];
 
-displayLyrics(blocks, a, () => displayResults()); // finish the journey
-a.currentTime = 0;
-a.play().catch(()=>{});
+function playAudio12(onEnd){
+  const a = document.getElementById("audio12");
+  a.currentTime = 0;
+  a.play().catch(()=>{});
+
+  a.onended = () => {
+    if(onEnd) onEnd();
+  };
 }
   
 function displayLyrics(blocks, audioEl, onEnd, lyricsDiv) {
@@ -1011,7 +1015,7 @@ function buildGame11(){
 }
 
 /* ---------- Game 12: Favorite Dishes Quiz (>=5 questions) then final song ---------- */
-function buildGame12() {
+function buildGame12(){
   const qs = [
     {q:"Which Chinese dish is Clive’s comfort food?", opts:['Chilly Beef','Chicken 65','Ramen'], a:'Chilly Beef'},
     {q:"Which Filipino dish does Clive and Eden prefer on holidays or alone days?", opts:['Adobo Chicken','Pancit','Sisig'], a:'Sisig'},
@@ -1021,14 +1025,10 @@ function buildGame12() {
   ];
 
   const box = document.createElement('div');
-  box.innerHTML = `
-    <h2>12) Favorite Dishes Quiz</h2>
+  box.innerHTML = `<h2>12) Favorite Dishes Quiz</h2>
     <div id="dishArea" style="text-align:left;max-width:760px;margin:0 auto"></div>
-    <div style="margin-top:12px">
-      <button class="btn primary" id="dishSubmit">Submit Answers</button>
-    </div>
-    <div class="note" id="dishNote"></div>
-  `;
+    <div style="margin-top:12px"><button class="btn primary" id="dishSubmit">Submit Answers</button></div>
+    <div class="note" id="dishNote"></div>`;
   stage.appendChild(box);
 
   const area = document.getElementById('dishArea');
@@ -1046,37 +1046,35 @@ function buildGame12() {
   startTimer(12);
 
   document.getElementById('dishSubmit').addEventListener('click', ()=>{
+    // evaluate answers
     let correct = 0;
     qs.forEach((it,idx)=>{
       const sel = document.querySelector(`input[name="dish${idx}"]:checked`);
       if(sel && sel.value === it.a) correct++;
     });
 
-    if(correct === 0){
-      document.getElementById('dishNote').innerHTML =
-        `<span style="color:${'var(--bad)'}">No answers correct. Try again!</span>`;
-      return;
+    if(correct === qs.length){
+      const secs = stopTimer(12); 
+      
+      // always max points (5) if perfect
+      const pts = 5;
+
+      // save result for final chart
+      gameResult[12] = {secs, pts};
+
+      // show modal
+      document.getElementById('modalTitle').textContent = 'Final Quiz Complete!';
+      document.getElementById('modalBody').textContent = `You got all ${qs.length} correct 🎉`;
+      document.getElementById('modalTime').textContent = `Time: ${secs}s, Points: ${pts}`;
+      overlay.classList.add('show');
+
+      // play the final song → after it ends → show results
+      playAudio12(() => displayResults());
+
+    } else {
+      document.getElementById('dishNote').innerHTML = 
+        `<span style="color:${'var(--bad)'}">You got ${correct}/${qs.length} right. Try again!</span>`;
     }
-
-    // stop timer and calculate score
-    const secs = stopTimer(12);
-
-    // Scale the 5-point score by BOTH correctness and time
-    let timePoints = pointsFor(12, secs);  // 1–5
-    let accuracyRatio = correct / qs.length; // 0–1
-    let pts = Math.round(timePoints * accuracyRatio); // scaled score 0–5
-
-    // Save + show
-    gameResult[12] = {secs, pts};
-    solved++;
-    updateProgress();
-
-    // Lock the UI
-    document.getElementById('dishNote').innerHTML =
-      `<span style="color:var(--good)">You got ${correct}/${qs.length} correct! (${pts} pts)</span>`;
-
-    // Play the final anniversary song, then move to results screen
-    playAudio12();
   });
 }
 
@@ -1200,6 +1198,7 @@ window.addEventListener("load", () => {
 </script>
 </body>
 </html>
+
 
 
 
