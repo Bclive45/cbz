@@ -857,10 +857,8 @@ const user = norm(userRaw);
 const correct = norm(correctRaw);
 if (!user) return false;
 
-// exact or contains the normalized correct phrase
 if (user === correct || user.includes(correct)) return true;
 
-// check aliases
 const al = aliases[correct] || [];
 for (const a of al){
   const na = norm(a);
@@ -875,7 +873,6 @@ if(!raw){
 note.textContent = 'Type something.';
 return;
 }
-
 
 const ok = isCorrect(raw, puzzles[idx].ans);
 
@@ -901,6 +898,7 @@ if(e.key === 'Enter') check.click();
 
 show();
 }
+
 
 /* ---------- Game 9: Sequence puzzle ---------- */
 function buildGame9(){
@@ -1130,6 +1128,7 @@ window.showWin = showWin;
 </script>
 </body>
 </html>
+
 
 
 
