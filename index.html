@@ -19,6 +19,33 @@
       white-space: pre-line;
       color: black;   /* change to yellow if background is white */
     }
+  #splash {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: #ffebf0; /* soft pink background */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  transition: opacity 1s ease;
+}
+
+.splash-content {
+  text-align: center;
+  font-family: "Inter", sans-serif;
+  color: #b30059;
+  padding: 20px;
+}
+
+.splash-content h1 {
+  font-size: 2.2em;
+  margin-bottom: 12px;
+}
+
+.splash-content p {
+  font-size: 1.2em;
+}
   html,body{height:100%}
   body{
     margin:0; font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
@@ -105,7 +132,14 @@
       <main class="stage" id="stage">
         <!-- Game sections get injected here -->
       </main>
-
+      <!-- Splash Screen -->
+      <div id="splash">
+        <div class="splash-content">
+          <h1>💖 Happy Anniversary Clive & Eden 💖</h1>
+          <p>Eight years of love, laughter, and memories.<br>
+             Hope you enjoy your wishes 🎉</p>
+        </div>
+      </div>
       <div class="note">Progress saves only per page session. Reload resets the journey.</div>
     </div>
   </div>
@@ -1155,9 +1189,18 @@ startGame(1); // begins with game 1 automatically
 /* Expose startGame for modal navigation and tests */
 window.startGame = startGame;
 window.showWin = showWin;
+window.addEventListener("load", () => {
+  const splash = document.getElementById("splash");
+
+  setTimeout(() => {
+    splash.style.opacity = "0";
+    setTimeout(() => splash.remove(), 1000); // remove after fade
+  }, 3000); // visible for 3 seconds
+});
 </script>
 </body>
 </html>
+
 
 
 
