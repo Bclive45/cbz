@@ -577,59 +577,102 @@ function buildGame6(){
   let pathClicked = [];
 }
 
-/* ---------- Game 7: Find 7 differences (we simulate by 7 hotspots over the two images) ---------- */
-function buildGame7(){
+/* ---------- Game 7: Find 7 differences (updated) ---------- */
+function buildGame7() {
+  // Clear previous stage
+  stage.innerHTML = '';
+
   const box = document.createElement('div');
   box.innerHTML = `<h2>7) Spot the Differences — 7 differences</h2>
     <p>Click each difference you find between the two photos.</p>
     <div style="display:flex;gap:10px;justify-content:center;align-items:flex-start;flex-wrap:wrap">
       <div style="position:relative">
-        <img src="wedding2.jpg" alt="left" style="max-width:300px;border-radius:10px">
-        <div id="leftHotspots" style="position:absolute;inset:0;"></div>
+        <img id="leftImg" src="wedding2.jpg" alt="left" style="max-width:300px;border-radius:10px">
+        <div id="leftHotspots" style="position:absolute;inset:0;z-index:10;"></div>
       </div>
       <div style="position:relative">
-        <img src="wedding3.jpg" alt="right" style="max-width:300px;border-radius:10px">
-        <div id="rightHotspots" style="position:absolute;inset:0;"></div>
+        <img id="rightImg" src="wedding3.jpg" alt="right" style="max-width:300px;border-radius:10px">
+        <div id="rightHotspots" style="position:absolute;inset:0;z-index:10;"></div>
       </div>
     </div>
-    <div class="note" id="diffNote"></div>
+    <div class="note" id="diffNote">0 / 7 found</div>
   `;
   stage.appendChild(box);
   startTimer(7);
-  // Randomly create 7 hotspots on left image; clicking matching areas counts
-  const hotspots = [];
+
   const left = box.querySelector('#leftHotspots');
   const right = box.querySelector('#rightHotspots');
-  const W = 300, H = 200; // approximate overlay dims; fine for placeholders
-  for(let i=0;i<7;i++){
-    const x = 20 + Math.random()*(W-40), y = 20 + Math.random()*(H-40);
-    hotspots.push({x,y,found:false});
-  }
-  hotspots.forEach((h,idx)=>{
-    const dotL = document.createElement('div'); styleHotspot(dotL,h); left.appendChild(dotL);
-    const dotR = document.createElement('div'); styleHotspot(dotR,h); right.appendChild(dotR);
-    dotL.addEventListener('click', ()=> markHot(idx, dotL, dotR));
-    dotR.addEventListener('click', ()=> markHot(idx, dotL, dotR));
-  });
-  function styleHot(el,h){
-    el.style.position='absolute'; el.style.left=(h.x/ (W) * 100)+'%'; el.style.top=(h.y/(H)*100)+'%';
-    el.style.width='18px'; el.style.height='18px'; el.style.borderRadius='50%'; el.style.transform='translate(-50%,-50%)';
-    el.style.border='2px solid rgba(255,255,255,0.9)'; el.style.boxShadow='0 6px 12px rgba(0,0,0,.12)'; el.style.cursor='pointer';
-  }
-  function markHot(i, l, r){
-    if(hotspots[i].found) return;
-    hotspots[i].found = true;
-    l.style.background = '#ffb6c1'; r.style.background = '#ffb6c1';
-    l.style.border='2px solid #fff'; r.style.border='2px solid #fff';
-    const leftCount = hotspots.filter(h=>h.found).length;
-    document.getElementById('diffNote').textContent = `${leftCount} / 7 found`;
-    if(leftCount === 7){
-      const secs = stopTimer(7);
-      const pts = pointsFor(7,secs);
-      showWin(7,secs,pts);
+
+  // Get actual image size
+  const leftImg = box.querySelector('#leftImg');
+  const rightImg = box.querySelector('#rightImg');
+
+  leftImg.onload = () => initializeHotspots(leftImg, rightImg);
+  rightImg.onload = () => initializeHotspots(leftImg, rightImg);
+
+  function initializeHotspots(leftImg, rightImg) {
+    // only initialize once
+    if (left.childElementCount > 0) return;
+
+    const W = leftImg.width;
+    const H = leftImg.height;
+
+    const hotspots = [];
+    for (let i = 0; i < 7; i++) {
+      const x = 20 + Math.random() * (W - 40);
+      const y = 20 + Math.random() * (H - 40);
+      hotspots.push({ x, y, found: false });
+    }
+
+    hotspots.forEach((h, idx) => {
+      const dotL = document.createElement('div');
+      const dotR = document.createElement('div');
+      styleHotspot(dotL, h, W, H);
+      styleHotspot(dotR, h, W, H);
+      left.appendChild(dotL);
+      right.appendChild(dotR);
+
+      dotL.addEventListener('click', () => markHot(idx, dotL, dotR));
+      dotR.addEventListener('click', () => markHot(idx, dotL, dotR));
+    });
+
+    function styleHotspot(el, h, W, H) {
+      el.style.position = 'absolute';
+      el.style.left = (h.x / W) * 100 + '%';
+      el.style.top = (h.y / H) * 100 + '%';
+      el.style.width = '18px';
+      el.style.height = '18px';
+      el.style.borderRadius = '50%';
+      el.style.transform = 'translate(-50%,-50%)';
+      el.style.border = '2px solid rgba(255,255,255,0.9)';
+      el.style.boxShadow = '0 6px 12px rgba(0,0,0,.12)';
+      el.style.cursor = 'pointer';
+      el.style.background = 'rgba(255,0,0,0.3)'; // visible for testing
+    }
+
+    function markHot(i, l, r) {
+      if (hotspots[i].found) return;
+      hotspots[i].found = true;
+      l.style.background = '#ffb6c1';
+      r.style.background = '#ffb6c1';
+      l.style.border = '2px solid #fff';
+      r.style.border = '2px solid #fff';
+
+      const leftCount = hotspots.filter(h => h.found).length;
+      document.getElementById('diffNote').textContent = `${leftCount} / 7 found`;
+
+      if (leftCount === 7) {
+        const secs = stopTimer(7);
+        const pts = pointsFor(7, secs);
+        showWin(7, secs, pts);
+
+        // Move on to Game 8 after a short delay
+        setTimeout(buildGame8, 1000);
+      }
     }
   }
 }
+
 
 /* ---------- Game 8: Emoji puzzles (5 puzzles, some biblical) ---------- */
 function buildGame8(){
@@ -907,3 +950,4 @@ window.showWin = showWin;
 </script>
 </body>
 </html>
+
