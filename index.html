@@ -818,8 +818,8 @@ const puzzles = [
 let idx = 0;
 
 const box = document.createElement('div');
-box.innerHTML = `<h2>8) Emoji Puzzles</h2> <p>Solve each emoji clue (type a short answer).</p> <div id="emojiArea" style="font-size:28px;font-weight:700;margin:8px"></div> <input id="emojiAns" type="text" placeholder="Type answer..." /> <button class="btn primary" id="emojiCheck">Check</button> <div class="note" id="emojiNote"></div> ;
-stage.appendChild(box)`;
+box.innerHTML = `<h2>8) Emoji Puzzles</h2> <p>Solve each emoji clue (type a short answer).</p> <div id="emojiArea" style="font-size:28px;font-weight:700;margin:8px"></div> <input id="emojiAns" type="text" placeholder="Type answer..." /> <button class="btn primary" id="emojiCheck">Check</button> <div class="note" id="emojiNote"></div>` ;
+stage.appendChild(box);
 startTimer(8);
 
 const area = document.getElementById('emojiArea');
@@ -1128,6 +1128,7 @@ window.showWin = showWin;
 </script>
 </body>
 </html>
+
 
 
 
